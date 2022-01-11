@@ -1295,6 +1295,8 @@ javascriptIsFun = "YES!";
 
   > Events - is something happen on the page. With an event listener, can wait for a certain event to happen and then react to it
 
+  > Event handler function are also called callback function
+
   ```js
   //  1st: Need to select the element where the event should happen
   // 2nd: On that element, can call a method e.g addEventListener() so we need to call it once more using parenthesis. Then need to pass in the type of event, just a simple click (1st arg)
@@ -1681,6 +1683,39 @@ javascriptIsFun = "YES!";
   ![](./img/behind6.png)
   ![](./img/behind7.png)
   ![](./img/behind8.png)
+
+- JS Engine and Runtime
+
+  > V8 engine - powers Google Chrome and also Node.js -- so we can build server side applications with JS outside any browser
+
+  > Call Stack - where code is actually executed using something called execution contexts
+
+  > Heap - is an unstructured memory pool which stores all the objects our application needed
+
+  ![](./img/jsEnginr.png)
+  ![](./img/jsEnginr1.png)
+
+  - Modern Just-In-Time Compilation of JS
+
+    - First step is to parse the code - means read the code, during parsing process, the code is parsed into a data structure called AST(abstract syntax tree) -- this tree has nothing to do with DOM
+    - 2nd step is the compilation - takes the generated AST and compiles it into machine code
+    - 3rd step - executed right away --(modern JS engine)
+    - \*\*Note: modern JS engines actually have some pretty clever optimazation strategies -- create a very unoptimized versin on MC in the beginning just so that it can start executing as fast as possible -- then in the background, this code is optimized and recompiled during the already running program execution.
+
+      ![](./img/JIC.png)
+
+    - without engine, there is no runtime therefore no JS at all
+    - Runtime - container including all the things that we need to use JS (in this case in the browser)
+    - the heart of any JS runtime is always JS engine
+    - engine alone is not enough, in order to work properly, we also need access to the web API's --related to the DOM or timers or even console.log
+    - Web API's - are functionalities provided to the engine, accessible on global window object
+
+  - Typical JS runtime also includes **callback queue** --is a data structured that contains all the callback functions that are ready to be executed ex. we attach event handler function to DOM elements like button to reacts to certain events **--event handler function are also called callback function**
+
+    - for ex. a click, the callback function will be called --first thing that actually happpens after the event is that the callback function is put into callback queue --then when the stack is empty the callback function is passed to the stack so that it can be executed. --basically happens in **event loop - essential for non-blocking conxurrency model** that takes callback functions from callback queue and puts them in the call stacl to be executed.
+
+    ![](./img/runtime.png)
+    ![](./img/runtime1.png)
 
 ## Section 09: Data Structures, Modern Operators and Strings
 
