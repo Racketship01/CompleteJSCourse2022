@@ -875,7 +875,7 @@ javascriptIsFun = "YES!";
 
   > "this" variable - basically equal to the object calling the method (ex. jonas as a variable object) | can also use to store new property
 
-  > arrays (methods) are actually also objects, they are just special kind of objects, they hace methods that we can use to manipulate them like pop, push, shift and unshift.
+  > arrays (methods) are actually also objects, they are just special kind of objects, they have methods that we can use to manipulate them like pop, push, shift and unshift.
 
   ```js
   // Object Method
@@ -1693,6 +1693,11 @@ javascriptIsFun = "YES!";
   > Heap - is an unstructured memory pool which stores all the objects our application needed
 
   ![](./img/jsEnginr.png)
+
+  > Compilation - machine code is built and then it is executed in the CPU in the processor --execution happen after compilation ex. application that we using on our computer, it has been compiled before and executing way after compilation
+
+  > Interpretation - runs through source code and executes line by line (executed all at the same time) --still needs to be converted into MC but simply happens right before its executed and not ahead of time
+
   ![](./img/jsEnginr1.png)
 
   - Modern Just-In-Time Compilation of JS
@@ -1712,10 +1717,40 @@ javascriptIsFun = "YES!";
 
   - Typical JS runtime also includes **callback queue** --is a data structured that contains all the callback functions that are ready to be executed ex. we attach event handler function to DOM elements like button to reacts to certain events **--event handler function are also called callback function**
 
-    - for ex. a click, the callback function will be called --first thing that actually happpens after the event is that the callback function is put into callback queue --then when the stack is empty the callback function is passed to the stack so that it can be executed. --basically happens in **event loop - essential for non-blocking conxurrency model** that takes callback functions from callback queue and puts them in the call stacl to be executed.
+    - for ex. a click, the callback function will be called --first thing that actually happpens after the event is that the callback function is put into callback queue --then when the stack is empty the callback function is passed to the stack so that it can be executed. --basically happens in **event loop - essential for non-blocking concurrency model** that takes callback functions from callback queue and puts them in the call stack to be executed.
 
     ![](./img/runtime.png)
     ![](./img/runtime1.png)
+
+- Execution contexts and the Call Stack
+
+  - What is an execution context?
+
+    - code is now ready to be executed
+    - global execution context is created for the top-level code --basically code that is not inside any functions will be executed (function should only be executed when called)
+    - JS code always runs inside an execution context
+      ![](./img/ec.png)
+
+    - Note: Scope chain - basically consists of references to variables that are located outside of the current function. And to keep track of the scope chain, it is stored in each execution context
+
+      ![](./img/ec1.png)
+      ![](./img/ec2.png)
+
+    - Note: execution context belonging to arrow functions, do not get their own arguments keyword nor do they get the this keyword --arrow dont have the arguments object and this keyword, instead they can use the arguments object and this keyword from their closest regular function parent
+    - Technically speaking --code runs inside of execution context that are in the call stack.
+
+- Scope and Scope Chain
+
+  - Lexical scoping e.g -- a function that is written inside another function has access to the variables of the parent function
+  - Variable scoping is influenced by where exactly we write our functions and code blocks
+  - Scope -- in case of functions, essentially the variable environment which is stored in the functions execution context (difference between scope and variable environment are basically the same)
+  - Scope of a variable --entire region
+    ![](./img/scope.png)
+    ![](./img/scope1.png)
+    ![](./img/scope2.png)
+
+  - Note: variable lookup -- if one scope needs to use a certain variable but cant find in current scope, it will look up in the scope chain and find in one of the parent scopes.
+    > on scope can only look up in scope chain but it cant look down.
 
 ## Section 09: Data Structures, Modern Operators and Strings
 

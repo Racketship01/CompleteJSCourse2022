@@ -102,3 +102,21 @@ btnHold.addEventListener('click', function () {
 // RESET Game
 btnNew.addEventListener('click', init);
 // we dont declare anonymous function for event handler instead we pass n the init function --okay to pass as other function
+
+// const name = 'jonas';
+
+// const first = () => {
+//   let a = 1;
+//   const b = second(7, 9);
+//   a += b;
+//   return a;
+// };
+
+// function second(x, y) {
+//   var c = 2;
+//   return c;
+// }
+
+// const x = first();
+
+// console.log(x);
