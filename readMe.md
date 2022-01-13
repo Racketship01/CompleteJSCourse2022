@@ -1750,7 +1750,65 @@ javascriptIsFun = "YES!";
     ![](./img/scope2.png)
 
   - Note: variable lookup -- if one scope needs to use a certain variable but cant find in current scope, it will look up in the scope chain and find in one of the parent scopes.
+
     > on scope can only look up in scope chain but it cant look down.
+
+  - Note: var -- function scoped, let & const -- block scoped
+
+    ![](./img/scope3.png)
+
+  - Note: the order in which functions are called does not affect the scope chain e.g the third function dont have access in 2nd function even though called the third
+
+    ![](./img/scope4.png)
+
+- Scoping in Practice
+
+  ```js
+  function calcAge(birthYear) {
+    const age = 2037 - birthYear;
+
+    function printAge() {
+      let output = `${firstName} you are ${age}, born in ${birthYear}`;
+      console.log(output);
+
+      if (birthYear >= 1981 && birthYear <= 1996) {
+        var millenial = true;
+        // Creating NEW variable with same name as outer's scope
+        const firstName = "Steven";
+
+        const str = `Your'e a millenial, ${firstName} `;
+        console.log(str);
+
+        //reassigning variable from outer's scope
+        output = "NEEEEW!";
+
+        function add(a, b) {
+          return a + b;
+        }
+        console.log(add(2, 3));
+      }
+      console.log(millenial); //var is a function scope
+      // add(2, 3); //reference error -- functions are block scope -- only true for strict mode
+      console.log(output);
+    }
+    printAge();
+
+    return age;
+  }
+
+  const firstName = "Jonas";
+  calcAge(1991);
+  ```
+
+- Variable Environment: Hoisting and the TDZ
+
+  ![](./img/hoist.png)
+
+  ![](./img/hoist1.png)
+
+  - Note: each and every let and const variable get their own TDZ (temporal dead zone) that starts at the beginning of the scope until the line where it is defined. And variable is safe to use after the TDZ.
+
+- Hoisting and TDZ in Practice
 
 ## Section 09: Data Structures, Modern Operators and Strings
 
