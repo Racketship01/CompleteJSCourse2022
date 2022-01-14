@@ -1808,7 +1808,144 @@ javascriptIsFun = "YES!";
 
   - Note: each and every let and const variable get their own TDZ (temporal dead zone) that starts at the beginning of the scope until the line where it is defined. And variable is safe to use after the TDZ.
 
+  ```js
+  // HOISTING
+
+  // VAR HOISTING
+  var num;
+  num = 6;
+  console.log(num);
+
+  // FUNCTION DECLARATION HOISTING
+  defineHoisted();
+  function defineHoisted() {
+    console.log("hoisted");
+  }
+
+  // LET & CONST HOISTING
+  let num; //declaration
+  num = 6; //initialization
+  console.log(num);
+
+  const num = 6;
+  console.log(num);
+
+  // TDZ
+  const myName = "Jane";
+
+  if (myName === "Jane") {
+    const age = 2037 - 1991;
+    console.log(`${myName} is a ${job}`); //TDZ
+    console.log(age);
+    const job = "teacher";
+    console.log(x);
+  }
+
+  console.log(myName);
+  ```
+
 - Hoisting and TDZ in Practice
+
+  - Note: Window is the global object of JS in the browser -- variables declared in let & const do not create properties on the window object
+
+  ```js
+  // Practice Hoisting
+
+  // Variables
+  console.log(me);
+  //console.log(job);
+  //console.log(yr);
+
+  var me = "Jonas";
+  let job = "teacher";
+  const yr = 1991;
+
+  // Functions
+
+  console.log(addDec(2, 3));
+  //console.log(addExp(2, 3));
+  console.log(addArrow);
+  //console.log(addArrow(2, 3));
+
+  function addDec(a, b) {
+    return a + b;
+  }
+
+  const addExp = function (a, b) {
+    return a + b;
+  };
+
+  var addArrow = (a, b) => a + b;
+
+  // Example
+  console.log(deleteShoppingCart());
+  if (!numProducts) deleteShoppingCart();
+
+  var numProducts = 10;
+
+  function deleteShoppingCart() {
+    console.log("All products deleted!");
+  }
+
+  var x = 1;
+  let y = 2;
+  const z = 3;
+
+  console.log(x === window.x);
+  console.log(y === window.y);
+  console.log(z === window.z);
+  ```
+
+- The 'this' keyword
+
+  ![](./img/this.png)
+
+  - Note: not as a method attached to any object will simply be undefined -- only valid for strict mode
+  - \*\*if use 'this' variable in arrow function, it will bw simply be the this keyword of the parent function (lexical this keyword)
+  - \*\* 'this' kewyword in the global scope is simply window object e.g console.log(this);
+
+  - 'this' Practice
+
+    - Method borrowing - borrowing method from one object to the other (dry code)
+    - 'this' keyword always points to the object that is calling the method.
+
+    ```js
+    // 'this' keyword practice
+
+    console.log(this); //parent/globe scope
+
+    const calcAge = function (birthYear) {
+      console.log(2037 - birthYear);
+      console.log(this); // undefined w/o attached to any object --in strict mode
+    };
+    calcAge(1991);
+
+    const calcAgeArrow = (birthYear) => {
+      console.log(2037 - birthYear);
+      console.log(this); // window -- because of this in the lexical scoping (parent/globe scope)
+    };
+    calcAgeArrow(1991);
+
+    const jonas = {
+      year: 1991,
+      calcAge: function () {
+        console.log(this); // attached to object jonas
+        console.log(2037 - this.year);
+      },
+    };
+    jonas.calcAge();
+
+    // Method borrowing
+    const matilda = {
+      year: 2017,
+    };
+
+    matilda.calcAge = jonas.calcAge; //method borrow
+    matilda.calcAge(); // calling the method on matilda --this keyword will point to matilda, object which called the method
+
+    const f = jonas.calcAge;
+    f(); // this keyword attached to jonas is now undefine because function f calling jonas is just a regular function
+    ```
 
 ## Section 09: Data Structures, Modern Operators and Strings
 
