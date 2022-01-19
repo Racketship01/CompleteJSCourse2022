@@ -1947,6 +1947,145 @@ javascriptIsFun = "YES!";
     f(); // this keyword attached to jonas is now undefine because function f calling jonas is just a regular function
     ```
 
+- Regular Functions vs Arrow Functions
+
+  ```js
+  // Regular vs Arrow
+
+  // var firstName = 'Matilda';
+
+  const jonas = {
+    firstName: "Jonas",
+    year: 1991,
+    calcAge: function () {
+      // console.log(this);
+      console.log(2037 - this.year);
+
+      // Solution 1
+      // const self = this; // self or that
+      // const isMillenial = function () {
+      //   console.log(self);
+      //   console.log(self.year >= 1981 && self.year <= 1996);
+      // };
+
+      // Solution 2
+      // arrow function inside parent scope --jonas object
+      const isMillenial = () => {
+        console.log(this);
+        console.log(this.year >= 1981 && this.year <= 1996);
+      };
+      isMillenial();
+      // inside regular function call, this keyword is undefined
+    },
+
+    // arrow functon in a method
+    greet: () => {
+      console.log(this);
+      console.log(`Hey ${this.firstName}`);
+    },
+    // Note: for best practice, never use arrow funtion as method in object
+
+    // greet: function () {
+    //   console.log(this);
+    //   console.log(`Hey ${this.firstName}`);
+    // },
+  };
+  jonas.greet();
+  jonas.calcAge();
+
+  // arguments keywords is only available in regular function not in arrow function
+  const addExp = function (a, b) {
+    console.log(arguments);
+    return a + b;
+  };
+  addExp(2, 3);
+  addExp(2, 5, 3, 8);
+
+  var addArrow = (a, b) => {
+    console.log(arguments);
+    return a + b;
+  };
+  addArrow(2, 5, 3, 8); // Reference Error
+  ```
+
+- Primitive vs Objects(Primitive vs Reference Types)
+
+  > In memory and memory management - usual to call primitives and reference type(objects)
+
+  > reference type(objects) stored in the memory heap (JS engine)
+
+  > primitive types are store in call stack
+
+  ![](./img/primVsObj.png)
+
+  ![](./img/primVsObj1.png)
+
+  ![](./img/primVsObj2.png)
+
+  **Note**: the piece of memory in the call stack has a reference to the piece of memory in the heap
+
+  **Note**: const are only immutable in primitive types not on reference
+
+  ```js
+  // Primitive vs Objects(Primitive vs Reference Types)
+
+  let age = 30;
+  let oldAge = age;
+  age = 31;
+  console.log(age);
+  console.log(oldAge);
+
+  const me = {
+    name: "Jonas",
+    age: 30,
+  };
+  const friend = me;
+  friend.age = 27;
+  console.log("Friend: ", friend);
+  console.log("Me: ", me);
+  ```
+
+- Primitives vs Object Practice
+
+  ```js
+  // Primitives vs Object Practice
+
+  // Primitive types
+  let lastName = "Williams";
+  let oldLastName = lastName;
+  lastName = "Davis";
+
+  // reference type
+  const jessica = {
+    firstName: "Jessica",
+    lastName: "Williams",
+    age: 27,
+  };
+  const marriedJessica = jessica;
+  marriedJessica.lastName = "Davis";
+  console.log("Before marriage:", jessica);
+  console.log("After marriage:", marriedJessica);
+
+  // copying object
+  const jessica2 = {
+    firstName: "Jessica",
+    lastName: "Williams",
+    age: 27,
+    family: ["Alice", "Bob"], // array is an object -- deeply nested object
+  };
+
+  const jessicaCopy = Object.assign({}, jessica2); // only property copy not array object -- only creates shallow copy not deep clone
+  jessicaCopy.lastName = "Davis";
+
+  // Note: shallow copy only copy the properties while deep clone copy everything
+
+  jessicaCopy.family.push("Mary");
+  jessicaCopy.family.push("John");
+
+  console.log("Before marriage:", jessica2);
+  console.log("After marriage:", jessicaCopy);
+  ```
+
 ## Section 09: Data Structures, Modern Operators and Strings
 
 ## Section 10: A Closer Look at Functions
