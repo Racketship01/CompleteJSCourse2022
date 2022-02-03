@@ -2066,7 +2066,7 @@ javascriptIsFun = "YES!";
   console.log("Before marriage:", jessica);
   console.log("After marriage:", marriedJessica);
 
-  // copying object
+  // copying object --
   const jessica2 = {
     firstName: "Jessica",
     lastName: "Williams",
@@ -2168,10 +2168,6 @@ javascriptIsFun = "YES!";
     categories: ["Italian", "Pizzeria", "Vegetarian", "Organic"],
     starterMenu: ["Focaccia", "Bruschetta", "Garlic Bread", "Caprese Salad"],
     mainMenu: ["Pizza", "Pasta", "Risotto"],
-
-    order: function (starterIndex, mainIndex) {
-      return [this.starterMenu[starterIndex], this.mainMenu[mainIndex]];
-    },
 
     openingHours: {
       thu: {
@@ -2277,6 +2273,33 @@ javascriptIsFun = "YES!";
   console.log(newArr);
   console.log(...newArr); // write individually array element
 
+  const restaurant = {
+    name: "Classico Italiano",
+    location: "Via Angelo Tavanti 23, Firenze, Italy",
+    categories: ["Italian", "Pizzeria", "Vegetarian", "Organic"],
+    starterMenu: ["Focaccia", "Bruschetta", "Garlic Bread", "Caprese Salad"],
+    mainMenu: ["Pizza", "Pasta", "Risotto"],
+
+    openingHours: {
+      thu: {
+        open: 12,
+        close: 22,
+      },
+      fri: {
+        open: 11,
+        close: 23,
+      },
+      sat: {
+        open: 0, // Open 24 hours
+        close: 24,
+      },
+    },
+
+    orderPasta: function (ing1, ing2, ing3) {
+      console.log(`You order pasta with ${ing1}, ${ing2} and ${ing3}`);
+    },
+  };
+
   const newMenu = [...restaurant.mainMenu, "Gnocci"]; // creating complete new array
   console.log(newMenu);
 
@@ -2298,9 +2321,9 @@ javascriptIsFun = "YES!";
 
   // multiple arguments in function -- real work example
   const ingredients = [
-    // prompt('Lets make pasta! Ingredient 1?'),
-    // prompt('Ingredient 2?'),
-    // prompt('Ingredient 3?'),
+    prompt("Lets make pasta! Ingredient 1?"),
+    prompt("Ingredient 2?"),
+    prompt("Ingredient 3?"),
   ];
   console.log(ingredients);
   restaurant.orderPasta(...ingredients);
@@ -2315,6 +2338,490 @@ javascriptIsFun = "YES!";
   console.log(restaurantCopy.name);
   console.log(restaurant.name);
   ```
+
+- Rest Pattern and Parameters
+
+  > has the same syntax with spread operator but actually does the opposite.
+
+  > rest pattern --uses the exact same syntax to collect multiple elements and **condense them into an array.** Basically collects the elements that are unused in the destructuring assignment.
+
+  > spread operator is to unpack an array, while rest is to pack
+
+  > spread operator we expand, while in rest we compress
+
+  ```js
+  // Rest Pattern and Parameters
+
+  // SPREAD -- because on the RIGHT side of the assignment operator
+  const arr = [1, 2, ...[3, 4]];
+
+  // 1) Destructuring
+
+  // REST -- on the LEFT side of assign operator
+  const [a, b, c, ...others] = [1, 2, 3, 4, 5];
+  console.log(a, b, c, others); //called rest because it will take the rest of the elements
+
+  // BOTH spread and rest
+  const [pizza, , risotto, ...otherFoods] = [
+    ...restaurant.mainMenu,
+    ...restaurant.starterMenu,
+  ];
+  console.log(pizza, risotto, otherFoods);
+  // rest pattern always must be the last in destructuring assignment
+  // only one rest in any destructuring assignment
+
+  // Object
+  const { sat, ...weekdays } = restaurant.openingHours;
+  console.log(weekdays);
+
+  // 2)  Functions
+  const add = function (...numbers) {
+    let sum = 0;
+    for (let i = 0; i < numbers.length; i++) sum += numbers[i];
+    console.log(sum);
+  };
+  add(2, 3);
+  add(5, 3, 7, 2);
+  add(5, 3, 7, 2, 5, 8, 9);
+
+  const x = [23, 4, 7];
+  add(...x); // x values being spread will enter add function then be pass into number array by the rest parameters
+
+  const restaurant = {
+    name: "Classico Italiano",
+    location: "Via Angelo Tavanti 23, Firenze, Italy",
+    categories: ["Italian", "Pizzeria", "Vegetarian", "Organic"],
+    starterMenu: ["Focaccia", "Bruschetta", "Garlic Bread", "Caprese Salad"],
+    mainMenu: ["Pizza", "Pasta", "Risotto"],
+
+    openingHours: {
+      thu: {
+        open: 12,
+        close: 22,
+      },
+      fri: {
+        open: 11,
+        close: 23,
+      },
+      sat: {
+        open: 0, // Open 24 hours
+        close: 24,
+      },
+    },
+
+    orderPizza: function (mainIngredients, ...otherIngredients) {
+      console.log(mainIngredients);
+      console.log(otherIngredients);
+    },
+  };
+
+  // rest parameters --real application at restaurant object
+
+  restaurant.orderPizza("mushrooms", "onion", "olives", "spinash");
+  restaurant.orderPizza("mushrooms");
+  ```
+
+- Short Circuit (&& and ||)
+
+  - Logical Operators
+
+    - 1 -- can use any data type then can return any data type and do something called --**SHORT CIRCUITING** aka short circuit evaluation
+      - OR Operator - short circuiting means that if the first value is a truthy value, it will immediately return the 1st value --can USE to set default values
+      - AND Operator - only true if all operands are true. opposite of OR operator, if the 1st value is falsy then immediately return falsy value w/o evaluating 2nd value --if both truthy, the last value return -- can USE to execute code in the second operand if 1st is true
+
+    ```js
+    // Short Circuit (&& and ||)
+
+    console.log("------- OR --------");
+    // OR operator -- return truthy values even if first operand is truthy other operand will not even be evaluated
+    console.log(3 || "Joe"); // 3
+    console.log("" || "Joe"); // Joe
+    console.log(true || 0); // true
+    console.log(undefined || null); //null --no short circuit last operand will return even falsy
+
+    console.log(undefined || 0 || "" || "Hello" || 23 || null); // Hello
+
+    // checking if has property in restaurant obj
+    restaurant.numGuests = 23;
+    const guests1 = restaurant.numGuests ? restaurant.numGuests : 10;
+    console.log(guests1);
+
+    const guest2 = restaurant.numGuests || 10;
+    console.log(guest2); // 10 --restaurant.numGuest was undefined --falsy
+
+    console.log("------- AND --------");
+
+    // AND operator--opposite of OR operator, if the 1st value is falsy then immediately return falsy value w/o evaluating 2nd value --if both truthy, the last value return
+    console.log(0 && "Jonas");
+    console.log(7 && "Jonas");
+    console.log("Hello" && 23 && null && "jonas"); // result will always be the falsy value even in multiple values
+
+    // practical practice
+    if (restaurant.orderPizza) {
+      console.log("mushrooms", "spinach");
+    }
+
+    restaurant.orderPizza && restaurant.orderPizza("mushrooms", "spinach");
+    ```
+
+- The Nullish Coalesing Operator (??)
+
+  > operator that as introduced in ES2020
+
+  > Nullish: zero and empty string ('') is not a nullish value --it is as if the zero and the empty string were not falsy values and were instead truthy values as well.
+
+  > Nullish value: null or undefined --If values are not defined and null, second operand will be returned
+
+  ```js
+  // Nullish Coalesing Operator (??)
+  restaurant.numGuests = 0;
+  const guest = restaurant.numGuests || 10;
+  console.log(guest);
+
+  // Nullish: null and undefined (NOT 0 or '')
+  const guestCorrect = restaurant.numGuests ?? 10;
+  console.log(guestCorrect);
+  ```
+
+- Logical Assignment Operators
+
+  > Introduced in ES2021
+
+  ```js
+  // Logical Assignment Operator
+  const rest1 = {
+    name: "Mama Sita",
+    //numGuest: 20,
+    numGuest: 0,
+  };
+
+  const rest2 = {
+    name: "Mang Kanor",
+    owner: "Nicanor Knorr",
+  };
+
+  // OR assignment operator --will assign a value to variable if that exact variable is currently falsy
+  // rest1.numGuest = rest1.numGuest || 10;
+  // rest2.numGuest = rest2.numGuest || 10;
+
+  // rest1.numGuest ||= 10;
+  // rest2.numGuest ||= 10; //--assigns a value to a variable if that variable is currently falsy
+
+  // Nullish assignment operator --assign a value to a variable if that exact variable is currently nullish(null or undefined)
+  rest1.numGuest ??= 10;
+  rest2.numGuest ??= 10;
+
+  // AND assignment operator
+  //rest1.owner = rest1.owner && 'Anonymous'; // undefined
+  rest1.owner &&= "Anonymous";
+  rest2.owner &&= "Anonymous";
+
+  console.log(rest1);
+  console.log(rest2);
+  ```
+
+- Looping Arrays: The FOR-OF LOOP
+
+  ```js
+  // Looping Arrays: The FOR-OF LOOP
+  const menu = [...restaurant.starterMenu, ...restaurant.mainMenu];
+
+  // regular for loop
+  for (let i = 0; i < menu.length; i++) {
+    console.log(menu[i]);
+  }
+
+  console.log(menu);
+
+  // for of --will automatically loop over the entire array and in each iteration gives acces to current array
+  for (const item of menu) console.log(item);
+  // variable item is always the current element
+
+  // current index
+  for (const [i, el] of menu.entries()) {
+    console.log(`${i + 1}: ${el}`);
+  }
+
+  //console.log([...menu.entries()]);
+  // menu.entries() --basically an array which in each position contain a new array that has both element and index number of that element in the original array
+  ```
+
+- Enhanced Object Literals
+
+  > Introduced in ES6
+
+  ```js
+  // Enhanced Object Literals
+
+  const weekdays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+  const openingHours = {
+    [weekdays[3]]: {
+      open: 12,
+      close: 22,
+    },
+    [weekdays[4]]: {
+      open: 11,
+      close: 23,
+    },
+    [weekdays[5]]: {
+      open: 0, // Open 24 hours
+      close: 12 + 12,
+    },
+  };
+
+  const restaurant2 = {
+    name: "Classico Italiano",
+    location: "Via Angelo Tavanti 23, Firenze, Italy",
+    categories: ["Italian", "Pizzeria", "Vegetarian", "Organic"],
+    starterMenu: ["Focaccia", "Bruschetta", "Garlic Bread", "Caprese Salad"],
+    mainMenu: ["Pizza", "Pasta", "Risotto"],
+
+    // ES6 enhance object literal
+    openingHours,
+    order(starterIndex, mainIndex) {
+      return [this.starterMenu[starterIndex], this.mainMenu[mainIndex]];
+    },
+  };
+  ```
+
+- Optional Chaining (?.)
+
+  ```js
+  // Optional Chaining (?.)
+
+  if (restaurant.openingHours && restaurant.openingHours.mon) {
+    console.log(restaurant.openingHours.mon.open);
+  }
+
+  // with OC
+  console.log(restaurant.openingHours.mon?.open); // undefined --property before ? (mon) the one being read if exist, if not undefined is the result
+  console.log(restaurant.openingHours?.mon?.open); //  if restaurant.openingHours does not even exist,well, then the Monday property will not even be read
+
+  // example
+  const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+  for (const day of days) {
+    //console.log(day);
+    const open = restaurant.openingHours[day]?.open ?? "closed";
+    console.log(`On ${day} , we are open at ${open}`);
+  }
+  // remember if we want to use a variable name as the property name, basically, we need to use the brackets notation.
+
+  // Methods
+  console.log(restaurant.order?.(0, 1) ?? "Method not exist");
+  console.log(restaurant.orderSalad?.(0, 1) ?? "Method not exist");
+
+  // Array
+  const user = [{ name: "jonas", email: "helloa@jonas,io" }];
+
+  // const user = [];
+  console.log(user[0]?.name ?? "User array empty");
+
+  // if else
+  if (user.length > 0) console.log(user[0].name);
+  else {
+    console.log("User array empty");
+  }
+  ```
+
+- Looping Objects: Object Keys, Values and Entries
+
+  - Unlike for of loop array, loop over object are not iterable in indirect way
+
+  ```js
+  // Looping Objects: Object Keys, Values and Entries
+
+  // Propperty NAMES
+  const properties = Object.keys(openingHours);
+  console.log(properties);
+
+  let openStr = `We are open in ${properties.length} days: `;
+
+  for (const day of properties) {
+    openStr += `${day}, `;
+  }
+  console.log(openStr);
+
+  // Property VALUES
+
+  const values = Object.values(openingHours);
+  console.log(values);
+
+  // Entries --names plus the values together --Entire object --distinction between array and object is important as we loop over the entire object
+
+  const entries = Object.entries(openingHours);
+  console.log(entries);
+
+  // [key, value]
+  for (const [key, { open, close }] of entries) {
+    console.log(`On ${key} we open at ${open} to ${close}`);
+  }
+  ```
+
+- Sets
+
+  > Set is a collection of unique values --means that a set can never have any duplicates --all duplicates will be gone
+
+  > Set is always iterables --elements are unique and the order of elements are relevant
+
+  > there is no indexes in sets
+
+  > using set cant retirieve data, if needed getting values out of a set use an array
+
+  > sets is not intended to replace arrays at all
+
+  ```js
+  // Sets
+  const ordersSet = new Set([
+    "Pasta",
+    "Pizza",
+    "Pizza",
+    "Pasta",
+    "Pasta",
+    "Risotto",
+  ]);
+  console.log(ordersSet);
+
+  console.log(new Set("Jonnaas")); // J o n a s
+
+  console.log(ordersSet.size); //3
+  console.log(ordersSet.has("Pizza")); // true
+  console.log(ordersSet.has("Bread")); // false
+
+  ordersSet.add("Garlic Bread");
+  ordersSet.add("Garlic Bread");
+  ordersSet.delete("Risotto");
+  // ordersSet.clear();
+  console.log(ordersSet);
+
+  for (const order of ordersSet) console.log(order);
+
+  // example
+  const staff = ["Waiter", "Chef", "Waiter", "Manager", "Chef", "Waiter"];
+  const staffUnique = [...new Set(staff)];
+  console.log(staffUnique);
+
+  console.log(
+    new Set(["Waiter", "Chef", "Waiter", "Manager", "Chef", "Waiter"]).size
+  );
+
+  console.log(new Set("jonasschedtmann").size);
+  ```
+
+- Maps: Fundamentals
+
+  > Map is a data structure that can use to map values to keys --like an object data is stored in key value pairs in maps
+
+  > difference between map, keys can have any type(object, arrays or other maps) and can be huge, while object, keys are basically always strings
+
+  ```js
+  // MAPS
+  const rest = new Map();
+  rest.set("name", "Classico Italiano"); //set method is similar to add -- allows to add new element
+
+  rest.set(1, "Firenze, Italy");
+  console.log(rest.set(2, "Lisbon, Portugal"));
+
+  rest
+    .set("categories", ["Italian", "Pizzeria", "Vegetarian", "Organic"])
+    .set("open", 11)
+    .set("close", 23)
+    .set(true, "We are open")
+    .set(false, "We are closed");
+  // calling set method returns the updated map
+
+  console.log(rest.get("name"));
+  console.log(rest.get(true));
+  // to read data from the map, use get method
+
+  const time = 12;
+  console.log(rest.get(time > rest.get("open") && time < rest.get("close")));
+
+  console.log(rest.has("categories")); // check method
+  rest.delete(2);
+  //rest.clear();
+
+  // Solution --define a variable to return an identifier from call stack
+  // array
+  const arr = [1, 2]; // refer to the same place in memory
+
+  rest.set(arr, "Test");
+  rest.set(document.querySelector("h1"), "Heading");
+  console.log(rest);
+  console.log(rest.size);
+
+  console.log(rest.get(arr)); // Refernce error --array are store in heap, therefore the key[1,2] will be a value in call stack. Address will be undefined as key will be a value at call stack
+
+  // object
+  const me = { name: "Jonas", age: 30 };
+  rest.set(me, "Name");
+
+  console.log(rest.get(me)); //use the same object/array to read the value out of the map
+  ```
+
+- Maps: Iteration
+
+  ```js
+  // Maps: Iteration
+  const question = new Map([
+    ["question", "What is the best programming language in the world?"],
+    [1, "C"],
+    [2, "Java"],
+    [3, "JavaScript"],
+    ["correct", 3],
+    [true, "Correct!"],
+    [false, "Try again!"],
+  ]);
+  // question.set(['best teacher', 'Jonas']); // Refernce error
+  console.log(question);
+
+  // convert object to maps
+  console.log(Object.entries(openingHours));
+
+  const hoursMap = new Map(Object.entries(openingHours));
+  console.log(hoursMap);
+
+  // iteration - quiz app
+  console.log(question.get("question"));
+  for (const [key, value] of question) {
+    if (typeof key === "number") console.log(`Answer ${key}: ${value}`);
+  }
+
+  //const answer = Number(prompt('Your answer'));
+  //console.log(question.get(question.get('correct') === answer));
+
+  // console.log(
+  //   question.get(
+  //     answer === question.get('correct') ?? answer !== question.get('correct')
+  //   )
+  // );
+
+  // convert map back to array
+  console.log([...question]); // unpack value by using spread operator
+
+  // methods in arrays
+  console.log([...question.entries()]);
+  console.log([...question.keys()]);
+  console.log([...question.values()]);
+  ```
+
+- Summary: Which Data Structure to Use
+
+  > 1st: Do we need a simple list values ? Use ARRAYS or a SET --values w/o any description
+
+  > 2nd: If need key values pairs ? Use Object or Maps --with a key value pair we have a way of describing the values using a keys
+
+  > In modern JS - common source of data come from Web APIs --comes in a special data format called JSON
+
+  > sets are not meant to replace arrays but rather to compliment them
+
+  ![](./img/DataStructure.png)
+  ![](./img/DataStructure1.png)
+
+- Working with Strings - Part 1
+
+  > impossible to mutate strings as they are primitives
 
 ## Section 10: A Closer Look at Functions
 
