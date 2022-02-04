@@ -2821,7 +2821,213 @@ javascriptIsFun = "YES!";
 
 - Working with Strings - Part 1
 
-  > impossible to mutate strings as they are primitives
+  > impossible to mutate strings as they are primitives --slice method and other method always return a new string
+
+  > Whenever we call a method on a string, JS will automatically behind the scene convert that string primitive to a string object with same content. Then its on that object where method are called --basically takes string and put in into a box which is the object (boxing)
+
+  ```js
+  // Working with Strings - Part 1
+
+  const airline = "TAP Air Portugal";
+  const plane = "A320";
+
+  console.log(plane[0]);
+  console.log(plane[1]);
+  console.log(plane[2]);
+  console.log("B737"[0]);
+
+  // lenght
+  console.log(airline.length);
+  console.log("B737".length);
+
+  // methods
+  console.log(airline.indexOf("r"));
+  console.log(airline.lastIndexOf("r"));
+  console.log(airline.indexOf("portugal")); // case-sensitive
+
+  // SLICE METHOD
+
+  // Note: one good use case is to extract part of a string using slice method
+  console.log(airline.slice(4)); // Air Portugal (sub-string) --zero-based and spacing is counted
+
+  console.log(airline.slice(4, 7));
+  // KIM: basically stops extracting before reaching index bumber 7 (declared in parameter) --also the length of extracted string is always going to be last parameter minus first
+
+  // extract string w/o knowing its index --using slice method
+  console.log(airline.slice(0, airline.indexOf(" ")));
+  console.log(airline.slice(airline.lastIndexOf(" ") + 1));
+
+  console.log(airline.slice(-2)); // al --negative index ill start extracting from the end
+
+  console.log(airline.slice(1, -1)); // cutoff the first letter at positon one and last letter at position -1
+
+  const checkMiddleSeat = function (seat) {
+    // const s = seat.slice(seat.lastIndexOf(' '));
+    const s =
+      seat.slice(-1) === "B" || seat.slice(-1) === "E"
+        ? `You're in middle seat`
+        : `You're not on middle seat`;
+    console.log(s);
+  };
+  checkMiddleSeat("11B");
+  checkMiddleSeat("23C");
+  checkMiddleSeat("3E");
+
+  console.log(new String("jonas")); // conversion string to object
+  console.log(typeof new String("jonas")); //object
+
+  console.log(typeof new String("jonas").slice(1));
+  // Note: When the operation is done --the object is converted back to primitive string --all string methods return primitives even if called on a string object
+  ```
+
+- Working with Strings - Part 2
+
+  ```js
+  // Working with Strings - Part 2
+  const airline = "TAP Air Portugal";
+
+  console.log(airline.toLowerCase());
+  console.log(airline.toUpperCase());
+
+  // Fix capitalization Name
+  const pax = "jOnAs";
+  const paxLower = pax.toLowerCase();
+  const paxUpper = paxLower[0].toUpperCase() + paxLower.slice(1);
+
+  console.log(paxUpper);
+
+  // Comparing emails
+  const email = "hello@jonas.io";
+  const loginEmail = "  Hello@Jonas.Io \n";
+
+  // const lowerEmail = loginEmail.toLowerCase();
+  // const trimmedEmail = lowerEmail.trim();
+  const normalizedEmail = loginEmail.toLowerCase().trim(); //start in ES2019 --can trim white space from start and at end
+  console.log(normalizedEmail);
+  console.log(email === normalizedEmail);
+
+  // replace method  --relace method also return a brand new string(doesnt mutate original) --case sensitive
+  const price = "₱100,000";
+  const priceUS = price.replace("₱", "$").replace(",", ".");
+  console.log(priceUS);
+
+  const announcement =
+    "All passengers come to boarding door 23. Boarding door 23!";
+
+  console.log(announcement.replace("door", "gate"));
+  console.log(announcement.replaceAll("door", "gate"));
+
+  // using regular expression
+  console.log(announcement.replace(/door/g, "gate")); // g stands for global
+
+  // Booleans
+  const plane = "Airbus A320neo";
+  console.log(plane.includes("A320"));
+  console.log(plane.includes("Boeing"));
+  console.log(plane.startsWith("Airb"));
+
+  if (plane.startsWith("Airbus") && plane.endsWith("neo")) {
+    console.log("Part of NEW Airbus family");
+  }
+
+  // Practice exercise
+  const checkBaggage = function (items) {
+    const baggage = items.toLowerCase();
+    if (baggage.includes("knife") || baggage.includes("gun")) {
+      console.log("You are NOT allowed on board");
+    } else {
+      console.log("WELCOME aboard!");
+    }
+  };
+  checkBaggage("I have a laptop, some Food and a pocket Knife");
+  checkBaggage("Socks and camera");
+  checkBaggage("Got some snacks and a gun for protection");
+  ```
+
+- Working with Strings - Part 3
+
+  > Split method - allows us to split a string into multiple parts based on a divider string --it will then store the results into elements of a **new array**
+
+  > Join method - is the opposite of split. method creates and returns a new string by concatenating all of the elements in an array
+
+  ```js
+  // Working with Strings - Part 3
+
+  // Split and join
+  console.log("a+very+nice+string".split("+"));
+  console.log("Jonas Schmedtmann".split(" "));
+
+  const [firstName, lastName] = "Jonas Schmedtmann".split(" ");
+
+  const newName = ["Mr.", firstName, lastName.toUpperCase()].join(" ");
+  console.log(newName);
+
+  const capitalizeName = function (name) {
+    const names = name.split(" ");
+    console.log(names);
+
+    const namesUpper = [];
+
+    for (const n of names) {
+      //namesUpper.push(n[0].toUpperCase() + n.slice(1));
+
+      namesUpper.push(n.replace(n[0], n[0].toUpperCase()));
+    }
+    console.log(namesUpper.join(" "));
+  };
+  capitalizeName("jessica ann smith davis");
+  capitalizeName("jonas schmedtmann");
+
+  // Padding
+  const message = "Go to gate 23";
+  console.log(message.padStart(25, "+").padEnd(35, "+"));
+  console.log("Jonas".padStart(25, "+").padEnd(35, "+"));
+
+  const maskCreditCard = function (number) {
+    const str = String(number);
+    const last = str.slice(-4);
+
+    return last.padStart(str.length, "*");
+    //console.log(last.padStart(str.length, '*'));
+  };
+  console.log(maskCreditCard(12345678));
+  console.log(maskCreditCard(12345678912345));
+  console.log(maskCreditCard("12345678912345678912345"));
+
+  // Repeat
+  const message2 = "Bad weather... All Departures delayed";
+
+  console.log(message2.repeat(5));
+
+  const planesInLine = function (n) {
+    console.log(`There are ${n} planes in line ${"🛩".repeat(n)}`);
+  };
+  planesInLine(5);
+  planesInLine(3);
+  planesInLine(12);
+  ```
+
+- String Method in Practice
+
+  ```js
+  // String Method Practice
+
+  // Data needed for a later exercise
+  const flights =
+    "_Delayed_Departure;fao93766109;txl2133758440;11:25+_Arrival;bru0943384722;fao93766109;11:45+_Delayed_Arrival;hel7439299980;fao93766109;12:05+_Departure;fao93766109;lis2323639855;12:30";
+
+  const getCode = (str) => str.slice(0, 3).toUpperCase();
+
+  for (const flight of flights.split("+")) {
+    const [type, from, to, time] = flight.split(";");
+    const output = `${
+      type.startsWith("_Delayed") ? "🔴" : ""
+    } ${type.replaceAll("_", " ")} from ${getCode(from)} to ${getCode(
+      to
+    )} (${time.replace(":", "h")})`;
+    console.log(output.padStart(50));
+  }
+  ```
 
 ## Section 10: A Closer Look at Functions
 
