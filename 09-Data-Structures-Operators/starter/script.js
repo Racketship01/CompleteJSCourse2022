@@ -958,7 +958,7 @@ document.querySelector('button').addEventListener('click', function () {
 });
 */
 //////////////////////////////////////////////////
-
+/*
 // String Method Practice
 
 // Data needed for a later exercise
@@ -975,3 +975,5 @@ for (const flight of flights.split('+')) {
   )} from ${getCode(from)} to ${getCode(to)} (${time.replace(':', 'h')})`;
   console.log(output.padStart(50));
 }
+*/
+//////////////////////////////////////////////////
