@@ -132,7 +132,7 @@ const greetArr = greeting => name => console.log(`${greeting} ${name}`);
 greetArr('Helloooo')('Jonass');
 */
 /////////////////////////////////////////////////
-
+/*
 // The Call and Apply Method
 
 const lufthansa = {
@@ -185,3 +185,209 @@ console.log(swiss);
 // modern JS not use apply --instead can still use a call method
 book.call(swiss, ...flightData);
 console.log(swiss);
+
+// Bind Method
+const bookEW = book.bind(euroWings);
+const bookLH = book.bind(lufthansa);
+const bookLX = book.bind(swiss);
+bookEW(23, 'Steven Williams');
+
+const bookEW23 = book.bind(euroWings, 23);
+bookEW23('Jonas Schedtmann');
+bookEW23('Martha Cooper');
+
+// with Event Listeners
+lufthansa.planes = 300;
+lufthansa.buyPlane = function () {
+  console.log(this);
+  this.planes++;
+  console.log(this.planes);
+};
+
+document
+  .querySelector('.buy')
+  .addEventListener('click', lufthansa.buyPlane.bind(lufthansa)); // the this keyword is not pointing at the object lufthansa.buyPlane but in the element selected (buy) --but using bind will creates a copy of buyPlane() and sets the this keyword.
+
+// Partial Application
+const addTax = (rate, value) => value + value * rate;
+console.log(addTax(0.1, 200));
+
+const addVAT = addTax.bind(null, 0.23); // preset arguments
+// addVAT = value => value + value * 0.23;
+console.log(addVAT(100));
+// the first argument of the bind method is the this keyword --use null instead if this keyword not in the function
+// if want want to preset the argument, it should always be the first argument
+
+// Challenge
+const taxAdd = function (rate) {
+  return function (value) {
+    console.log(value + value * rate);
+  };
+};
+
+const taxAddReg = taxAdd(0.1);
+taxAddReg(200);
+const taxVAT = taxAdd.bind(null)(0.23);
+taxVAT(100);
+
+// Other Solution --w/o using bind
+const addTaxRate = function (rate) {
+  return function (value) {
+    return value + value * rate;
+  };
+};
+
+const taxAddReg2 = addTaxRate(0.23);
+console.log(taxAddReg2(100));
+console.log(taxAddReg2(23));
+*/
+//////////////////////////////////////////////////
+/*
+// Challenge 01
+const poll = {
+  question: 'What is your favourite programming language?',
+  options: ['0: JavaScript', '1: Python', '2: Rust', '3: C++'],
+  // This generates [0, 0, 0, 0]. More in the next section!
+
+  // 1.1
+  answers: new Array(4).fill(0),
+  registerNewAnswer() {
+    //prompt(this.question);
+    const answer = Number(
+      prompt(
+        `${this.question}\n${this.options.join('\n')}\n(Write option number)`
+      )
+    );
+    console.log(answer);
+
+    // short circuiting 'AND' operator
+    typeof answer === 'number' &&
+      answer < this.answers.length &&
+      this.answers[answer]++;
+
+    this.displayResults();
+    this.displayResults('string');
+
+    // console.log(this.answers);
+  },
+
+  displayResults(type = 'array') {
+    if (type === 'array') {
+      console.log(this.answers);
+    } else if (type === 'string') {
+      // Poll results are 13, 2, 4, 1
+      console.log(`Poll results are ${this.answers.join(', ')}`);
+    }
+  },
+};
+poll.registerNewAnswer();
+
+document
+  .querySelector('.poll')
+  .addEventListener('click', poll.registerNewAnswer.bind(poll));
+
+poll.displayResults.call({ answers: [5, 2, 3] }, 'string');
+poll.displayResults.call({ answers: [1, 5, 3, 9, 6, 1] }, 'string');
+poll.displayResults.call({ answers: [5, 2, 3, 5, 3, 9, 6, 1] });
+*/
+////////////////////////////////////////////////
+/*
+// IIFE
+const runOnce = function () {
+  console.log('This');
+};
+runOnce();
+
+// IIFE
+(function () {
+  console.log('This will never run again');
+  console.log(runOnce());
+})();
+
+(() => console.log('This will ALSO never run again'))();
+
+// Variable declared with let or const create their own scope inside a block
+*/
+//////////////////////////////////////////////
+/*
+// Closure
+const secureBooking = function () {
+  let passengerCount = 0;
+
+  return function () {
+    passengerCount++;
+    console.log(`${passengerCount} passenger`);
+  };
+};
+const booker = secureBooking();
+booker();
+booker();
+booker();
+
+// secureBooking as being the birthplace of booker function
+
+// NOTE: Any function always has access to the variable environment of the execution context in which the function was created
+
+// the Booker function has access to the passengerCount variable(secureBooking function) because it's basically defined in the scope in which the Booker function was actually created. So in a sense, the scope chain is actually preserved through the closure, even when a scope has already been destroyed because its execution context is gone. This means that even though the execution context has actually been destroyed, the variable environment somehow keeps living somewhere in the engine.
+
+console.dir(booker);
+
+// More examples
+
+// Example 1
+let f;
+
+const g = function () {
+  const a = 23;
+  f = function () {
+    console.log(a * 2);
+  };
+};
+
+const h = function () {
+  const b = 777;
+  f = function () {
+    console.log(b * 2);
+  };
+};
+
+g(); // Execution context
+f(); // Closure
+console.dir(f);
+
+// re-assigning f function
+h();
+f();
+console.dir(f);
+//Note: whenever re-assinged functions even without returning them this will create a CLOSURE
+
+// Example 2
+const boardPassengers = function (n, wait) {
+  const perGroup = n / 3;
+
+  setTimeout(function () {
+    console.log(`We are now boarding all ${n} passengers`);
+    console.log(`There are 3 groups, each with ${perGroup} passengers`);
+  }, wait * 1000);
+
+  console.log(`Will start boarding in ${wait} seconds`);
+};
+
+const perGroup = 1000;
+boardPassengers(180, 3);
+// Closure --also includes the arguments because they are really just a local variables in the function
+
+// Closure will execute variable element inside a function first , when no local variable declared in function, closure will execute variable in the global scope
+*/
+////////////////////////////////////////////////
+
+// Challenge 2
+
+(function () {
+  const header = document.querySelector('h1');
+  header.style.color = 'red';
+
+  document.querySelector('body').addEventListener('click', function () {
+    header.style.color = 'blue';
+  });
+})();

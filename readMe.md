@@ -3200,11 +3200,11 @@ javascriptIsFun = "YES!";
 - The Call and Apply Methods
 
   ```js
-    // The Call and Apply Method
+  // The Call and Apply Method
 
   const lufthansa = {
-    airline: 'Lufthansa',
-    iataCode: 'LH',
+    airline: "Lufthansa",
+    iataCode: "LH",
     bookings: [],
     book(flightNum, name) {
       console.log(
@@ -3213,19 +3213,19 @@ javascriptIsFun = "YES!";
       this.bookings.push({ flight: `${this.iataCode}${flightNum}`, name });
     },
   };
-  lufthansa.book(239, 'Jonas Schedtmann');
-  lufthansa.book(896, 'Mike Smith');
+  lufthansa.book(239, "Jonas Schedtmann");
+  lufthansa.book(896, "Mike Smith");
   console.log(lufthansa);
 
   const euroWings = {
-    airline: 'Eurowings',
-    iataCode: 'EW',
+    airline: "Eurowings",
+    iataCode: "EW",
     bookings: [],
   };
 
   const swiss = {
-    airline: 'Swiss Airlines',
-    iataCode: 'LX',
+    airline: "Swiss Airlines",
+    iataCode: "LX",
     bookings: [],
   };
 
@@ -3234,17 +3234,17 @@ javascriptIsFun = "YES!";
   // Does NOT work
   // book(23, 'Sarah Williams')
 
-  // Call method -- the first argument is exactly what we want the this keyword point to (in this case the eurowings object) Ans allows us to manually and explicitly set the this keyword of any function that we want to call
+  // Call method -- the first argument is exactly what we want the this keyword point to (in this case the eurowings object) And allows us to manually and explicitly set the this keyword of any function that we want to call
 
-  book.call(euroWings, 23, 'Sarah William'); // call the book function with the this keyword set to eurowings
+  book.call(euroWings, 23, "Sarah William"); // call the book function with the this keyword set to eurowings
   console.log(euroWings);
 
-  book.call(lufthansa, 239, 'Mary Cooper');
+  book.call(lufthansa, 239, "Mary Cooper");
   console.log(lufthansa);
 
   // Apply method -- same as call methods, the only difference is that apply does NOT receive a list of arguments after the this keyword --instead gonna take an array of the arguments
 
-  const flightData = [234, 'George Cooper'];
+  const flightData = [234, "George Cooper"];
   book.apply(swiss, flightData);
   console.log(swiss);
   // first argument is the this keyword (object that needs to pass in)and the second argument is list of arrays --the data need to pass in
@@ -3252,8 +3252,183 @@ javascriptIsFun = "YES!";
   // modern JS not use apply --instead can still use a call method
   book.call(swiss, ...flightData);
   console.log(swiss);
-
   ```
+
+- The Bind Method
+
+  > The difference between call() and bind() is that the call() sets the this keyword and executes the function immediately and it does not create a new copy of the function, while the bind() creates a copy of that function and sets the this keyword.
+
+  > bind method also allows us to manually set this keyword for any function call
+
+  > the difference is that bind does not immediately call the function, instead it returns a new function where the this keyword is bound
+
+  > partial application --a common pattern specifying parts of the argument beforehand --means that a part of the arguments of the original function are already applied
+
+  ```js
+  // Bind Method
+  const bookEW = book.bind(euroWings);
+  const bookLH = book.bind(lufthansa);
+  const bookLX = book.bind(swiss);
+  bookEW(23, "Steven Williams");
+
+  const bookEW23 = book.bind(euroWings, 23);
+  bookEW23("Jonas Schedtmann");
+  bookEW23("Martha Cooper");
+
+  // with Event Listeners
+  lufthansa.planes = 300;
+  lufthansa.buyPlane = function () {
+    console.log(this);
+    this.planes++;
+    console.log(this.planes);
+  };
+
+  document
+    .querySelector(".buy")
+    .addEventListener("click", lufthansa.buyPlane.bind(lufthansa)); // the this keyword is not pointing at the object lufthansa.buyPlane but in the element selected (buy) --but using bind will creates a copy of buyPlane() and sets the this keyword.
+
+  // Partial Application
+  const addTax = (rate, value) => value + value * rate;
+  console.log(addTax(0.1, 200));
+
+  const addVAT = addTax.bind(null, 0.23); // preset arguments
+  // addVAT = value => value + value * 0.23;
+  console.log(addVAT(100));
+  // the first argument of the bind method is the this keyword --use null instead if this keyword not in the function
+  // if want want to preset the argument, it should always be the first argument
+
+  // Challenge
+  const taxAdd = function (rate) {
+    return function (value) {
+      console.log(value + value * rate);
+    };
+  };
+
+  const taxAddReg = taxAdd(0.1);
+  taxAddReg(200);
+  const taxVAT = taxAdd.bind(null)(0.23);
+  taxVAT(100);
+
+  // Other Solution --w/o using bind
+  const addTaxRate = function (rate) {
+    return function (value) {
+      return value + value * rate;
+    };
+  };
+
+  const taxAddReg2 = addTaxRate(0.23);
+  console.log(taxAddReg2(100));
+  console.log(taxAddReg2(23));
+  ```
+
+- Immediate Invoked Function Expressions (IIFE)
+
+  > An IIFE (Immediately Invoked Function Expression) is a JavaScript function that runs as soon as it is defined.
+
+  - 1: An IIFE (Immediately Invoked Function Expression) is a JavaScript function that runs as soon as it is defined.
+  - 2: The second part creates the immediately invoked function expression () through which the JavaScript engine will directly interpret the function.
+
+  ```js
+  const runOnce = function () {
+    console.log("This");
+  };
+  runOnce();
+
+  // IIFE
+  (function () {
+    console.log("This will never run again");
+    console.log(runOnce());
+  })();
+
+  (() => console.log("This will ALSO never run again"))();
+
+  // Variable declared with let or const create their own scope inside a block
+  ```
+
+- Closures
+
+  > Closure is not a feature that we explicitly use. We dont create closure manually, it simply happen automatically
+
+  ![](./img/closures.png)
+
+  > Closure makes a function remember all the variables that existed at the function's birthplace essentially
+
+  ![](./img/closures1.png)
+  ![](./img/closures2.png)
+
+  ```js
+  // Closure
+  const secureBooking = function () {
+    let passengerCount = 0;
+
+    return function () {
+      passengerCount++;
+      console.log(`${passengerCount} passenger`);
+    };
+  };
+  const booker = secureBooking();
+  booker();
+  booker();
+  booker();
+
+  // secureBooking as being the birthplace of booker function
+
+  // NOTE: Any function always has access to the variable environment of the execution context in which the function was created
+
+  // the Booker function has access to the passengerCount variable(secureBooking function) because it's basically defined in the scope in which the Booker function was actually created. So in a sense, the scope chain is actually preserved through the closure, even when a scope has already been destroyed because its execution context is gone. This means that even though the execution context has actually been destroyed, the variable environment somehow keeps living somewhere in the engine.
+
+  console.dir(booker);
+  ```
+
+  ```js
+  // More examples
+
+  // Example 1
+  let f;
+
+  const g = function () {
+    const a = 23;
+    f = function () {
+      console.log(a * 2);
+    };
+  };
+
+  const h = function () {
+    const b = 777;
+    f = function () {
+      console.log(b * 2);
+    };
+  };
+
+  g(); // Execution context
+  f(); // Closure
+  console.dir(f);
+
+  // re-assigning f function
+  h();
+  f();
+  console.dir(f);
+  //Note: whenever re-assinged functions even without returning them this will create a CLOSURE
+
+  // Example 2
+  const boardPassengers = function (n, wait) {
+    const perGroup = n / 3;
+
+    setTimeout(function () {
+      console.log(`We are now boarding all ${n} passengers`);
+      console.log(`There are 3 groups, each with ${perGroup} passengers`);
+    }, wait * 1000);
+
+    console.log(`Will start boarding in ${wait} seconds`);
+  };
+
+  const perGroup = 1000;
+  boardPassengers(180, 3);
+  // Closure --also includes the arguments because they are really just a local variables in the function
+
+  // Closure will execute variable element inside a function first , when no local variable declared in function, closure will execute variable in the global scope
+  ```
+
 ## Section 11: Working with Arrays
 
 ## Section 12: Numbers, Dates, Intl and Timers
