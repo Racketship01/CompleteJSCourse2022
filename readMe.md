@@ -3429,6 +3429,247 @@ javascriptIsFun = "YES!";
   // Closure will execute variable element inside a function first , when no local variable declared in function, closure will execute variable in the global scope
   ```
 
+- Simple Array Method
+
+  > methods are simply functions that we can call on objects. So basically, they are functions attached to objects.
+
+  > So if we have array methods, that means that arrays themselves are also objects. And so these array methods are simply functions that are attached to all arrays that we create in JavaScript.
+
+  > **Slice method** --extract part of any array but without changing the original array, instead it returns a new array. Also use to simplt create a shallow copy of any array
+
+  ```js
+  // SLICE
+  let arr = ["a", "b", "c", "d", "e"];
+  console.log(arr.slice(2));
+  console.log(arr.slice(2, 4)); // end parameter is not included in the output just like strings --length of the array will be end minus begin paramter (2)
+
+  console.log(arr.slice(-2)); // --we can define a negative begin parameter then will start to copy from the end of array
+
+  console.log(arr.slice(1, 2)); // starts extracting at position 1 and extracts everything except the last two (-2)
+
+  console.log(arr.slice()); // shallow copy of exact array
+
+  console.log([...arr]); // shallow copy using spread operator
+  ```
+
+  > The only time you really need to use the slice method here is when we want to chain multipme methods together, calling one after the other
+
+  > **Splice method** -- works almost same as slice but the core differnce is that it actually change the original array (mutates array) --splice deleted element from the original array --delete one or more elements from an array using splice
+
+  ```js
+  // SPLICE
+  // console.log(arr.splice(2)); //--output: c, d, e
+  // console.log(arr); // original array will be the first two element as we extracted from the postion 2 --output: a, b
+
+  arr.splice(-1); // minus one here is the last element
+  console.log(arr);
+
+  arr.splice(1, 2); // delete count (position) as declared in arguments --1st parameter here is the start but the 2nd is really the number of elements that we want to delete
+  console.log(arr);
+  ```
+
+  ![](./img/splice.png)
+
+  > **Reverse method** --simply reverse the order from end to begin --also does mutate the original array
+
+  ```js
+  // REVERSE
+  arr = ["a", "b", "c", "d", "e"];
+  const arr2 = ["j", "i", "h", "g", "f"];
+
+  arr2.reverse(); // simply reverse the order from end to begin --also does mutate the original array
+  console.log(arr2);
+  ```
+
+  > **Concat Method** --use to concatenate two arrays. --also does not mutate original array
+
+  ```js
+  // CONCAT
+  const letters = arr.concat(arr2);
+  console.log(letters);
+  console.log([...arr, ...arr2]); // using spread operator
+  ```
+
+  > **Join Method**
+
+  ```js
+  // JOIN
+  console.log(letters.join(" - ")); // result is a string with a separtor specified
+  ```
+
+- The NEW at Method
+
+  > **At Method** --use as a modern way to get element on the array --also works at strings
+
+  ```js
+  // The NEW at Method
+  const arr = [23, 11, 64];
+  console.log(arr[0]); // old way
+  console.log(arr.at(0)); // ES2020
+
+  // old way getting the last element
+  console.log(arr[arr.length - 1]); // old way --know the array length
+  console.log(arr.slice(-1)[0]); // using slice --take out values using bracket
+
+  // modern ES2020
+  console.log(arr.at(-1)); // negative makes the counting from the right side (end)
+
+  // Note: if want to get the last element of the array, use AT method and to do something called method chaining (combining multiple methods)
+
+  //if you just want to quickly get a value from an array, so just like the first element, then of course you can keep using the brackets notation.
+
+  // String
+  console.log("jonas".at(0));
+  console.log("jonas".at(-1));
+  ```
+
+- Looping Arrays: forEach
+
+  > is a higher order function
+
+  > a lot easier to access at the current index than for of loop
+
+  > forEach passes in the current element, the index and the entire array that we are looping. And so therefore we can specify them here in our parameter list.
+
+  > Fundamental difference : for of vs forEach
+
+  - forEach --will always loop over the entire array --cannot break out of a forEach loop (continue and break statements do not work in a forEach loop at all)
+
+  ```js
+  // Looping Arrays: forEach
+
+  const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+  // for (const movement of movements) {
+  for (const [i, movement] of movements.entries()) {
+    if (movement > 0) {
+      console.log(`Movement ${i + 1}: You deposite ${movement}`);
+    } else {
+      console.log(`Movement ${i + 1}: You withdrew ${Math.abs(movement)}`);
+    }
+  }
+
+  console.log("-----------FOREACH-----------");
+  movements.forEach(function (mov, i, arr) {
+    if (mov > 0) {
+      console.log(`Movement ${i + 1}: You deposite ${mov}`);
+    } else {
+      console.log(`Movement ${i + 1}: You withdrew ${Math.abs(mov)}`);
+    }
+  });
+  // 0: function(200)
+  // 1: function(450)
+  // ...
+
+  // forEach does is to loop over the array and in each iteration it will pass in the current element as an argument and execute the callback function
+
+  // 1st parameter: current element
+  // 2nd parameter: current index
+  // 3rd parameter: entire array that we loop
+  ```
+
+- forEach with Maps and Sets
+
+  ```js
+  // forEach with Maps and Sets
+
+  // Map
+  const currencies = new Map([
+    ["USD", "United States dollar"],
+    ["EUR", "Euro"],
+    ["GBP", "Pound sterling"],
+  ]);
+
+  currencies.forEach(function (value, key, map) {
+    console.log(`${key}: ${value}`);
+  });
+  // 1st parameter: current value
+  // 2nd parameter: key
+  // 3rd parameter: entire map that we loop over
+
+  // Sets
+  const currenciesUnique = new Set(["USD", "GBP", "USD", "EUR", "EUR"]);
+  console.log(currenciesUnique);
+
+  currenciesUnique.forEach(function (value, _, map) {
+    console.log(`${value}: ${value}`);
+  });
+
+  // key is exactly same as value because SET don't have key and indexes
+  // (_) --means a throwaway variable --variable taht completely unnecessary
+  ```
+
+- Project: BANKIST APP
+
+  ![](./11-Arrays-Bankist/final/Bankist-flowchart.png)
+
+  - Creating DOM elements
+
+    - The **insertAdjacentHTML() method** of the Element interface parses the specified text as HTML or XML and inserts the resulting nodes into the DOM tree at a specified position.
+
+    ```
+    position
+    A string representing the position relative to the element. Must be one of the following strings:
+    "beforebegin"
+    Before the element. Only valid if the element is in the DOM tree and has a parent element.
+
+    **"afterbegin"**
+    Just inside the element, before its first child.
+
+    **"beforeend":**
+    Just inside the element, after its last child.
+
+    **"afterend"**
+    After the element. Only valid if the element is in the DOM tree and has a parent element.
+
+    **text**
+    The string to be parsed as HTML or XML and inserted into the tree.
+
+    ```
+
+    ![](./img/insertAdjacent_position.png)
+
+    ```js
+    // Creating DOM elements
+    const displayMovements = function (movements) {
+      containerMovements.innerHTML = ""; // use to clear/empty entire container then start adding new elements
+
+      movements.forEach(function (mov, i) {
+        const type = mov > 0 ? "deposit" : "withdrawal";
+
+        const html = `<div class="movements__row">
+        <div class="movements__type movements__type--${type}">${
+          i + 1
+        } ${type}</div>
+        
+        <div class="movements__value">${Math.abs(mov)}</div>
+      </div>`;
+
+        containerMovements.insertAdjacentHTML("afterbegin", html); // method used to display/attach in webpage(DOM tree) --accepts two string 1st: position of new element we want to attach HTML (function) 2nd: text (string containing the HTML that we want to insert)
+
+        // afterbegin position --order of the element in the array would be inverted (*end to begin) --new child element will appear before all the other child elements
+
+        // beforeend position -- (*begin to end) simply be added after the previous one
+      });
+    };
+    displayMovements(account1.movements);
+    // Good practice: a lot better to pass data directly into the function than global variables
+
+    // console.log(containerMovements.innerHTML); // text content: simply returns text itself while HTML: returns everything, including the html (all HTML tags will be included)
+    ```
+
+- Data Transformations: Map, Filter, Reduce
+
+  > these methods use to create new arrays based on transforming data from other arrays
+
+  > **MAP** -- creates a brand new array based on the original array. So essentially the map method takes an array, loops over that array and in each alteration, it applies a callback function that we specify on our code to the current array element.
+
+  > **FILTER** -- used to filter for elements in the original array which satisfy a certain condition.
+
+  > **REDUCE** -- use to boil down all the elements of the original array into one single value
+
+  ![](./img/dataTransformation.png)
+
 ## Section 11: Working with Arrays
 
 ## Section 12: Numbers, Dates, Intl and Timers
