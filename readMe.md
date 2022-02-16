@@ -3653,9 +3653,37 @@ javascriptIsFun = "YES!";
       });
     };
     displayMovements(account1.movements);
-    // Good practice: a lot better to pass data directly into the function than global variables
+    // Good practice: a lot better to pass data directly into the function than global variables --each function should actually receive the data that it should work with, instead of using a global variable.
 
     // console.log(containerMovements.innerHTML); // text content: simply returns text itself while HTML: returns everything, including the html (all HTML tags will be included)
+    ```
+
+  - Computing Usernames
+
+    ```js
+    // Computing Username
+
+    const createUsernames = function (accs) {
+      accs.forEach(function (acc) {
+        acc.username = acc.owner
+          .toLowerCase()
+          .split(" ")
+          .map((name) => name[0])
+          .join("");
+      }); // forEach is a great case to produce some so called side effects --simply do dome work without returning anything
+    };
+    createUsernames(accounts);
+    console.log(accounts);
+
+    // const createUsernames = function (user) {
+    //   const username = user
+    //     .toLowerCase()
+    //     .split(' ')
+    //     .map(name => name[0])
+    //     .join('');
+    //   return username;
+    // };
+    // createUsernames('Steven Thomas Williams');
     ```
 
 - Data Transformations: Map, Filter, Reduce
@@ -3669,6 +3697,52 @@ javascriptIsFun = "YES!";
   > **REDUCE** -- use to boil down all the elements of the original array into one single value
 
   ![](./img/dataTransformation.png)
+
+- The Map Method
+
+  > this method will give a brand new array and will contain in each position the results of applying a callback function to the original array elements
+
+  > also has access to the 3 parameters --1st: current array element 2nd: current index 3rd: whole array
+
+  ```js
+  const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+  const euroToUsd = 1.1;
+
+  const moveToUsd = movements.map(function (mov) {
+    return mov * euroToUsd;
+  });
+
+  console.log(movements);
+  console.log(moveToUsd);
+
+  // for of
+  const movementsUSDfor = [];
+  for (const mov of movements) movementsUSDfor.push(mov * euroToUsd);
+  console.log(movementsUSDfor);
+
+  // arrow
+  const movementToUsd = movements.map((mov) => mov * euroToUsd);
+  console.log(movements);
+  console.log(movementToUsd);
+
+  // map with 3 parameters
+  const movementDescription = movements.map(
+    (mov, i) =>
+      `Movement ${i + 1}: You ${mov > 0 ? "deposited" : "withdrew"} ${Math.abs(
+        mov
+      )}`
+
+    // if (mov > 0) {
+    //   return `Movement ${i + 1}: You deposite ${mov}`;
+    // } else {
+    //   return `Movement ${i + 1}: You withdrew ${Math.abs(mov)}`;
+    // }
+  );
+  console.log(movementDescription);
+
+  // KIM: completely acceptable to have even more return statement as long as only one of them is executed
+  ```
 
 ## Section 11: Working with Arrays
 

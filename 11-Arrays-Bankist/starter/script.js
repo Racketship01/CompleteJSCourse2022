@@ -84,9 +84,34 @@ const displayMovements = function (movements) {
   });
 };
 displayMovements(account1.movements);
-// Good practice: a lot better to pass data directly into the function than global variables
+// Good practice: a lot better to pass data directly into the function than global variables --each function should actually receive the data that it should work with, instead of using a global variable.
 
 // console.log(containerMovements.innerHTML); // text content: simply returns text itself while HTML: returns everything, including the html (all HTML tags will be included)
+/////////////////////////////////////////////////////
+
+// Computing Username
+
+const createUsernames = function (accs) {
+  accs.forEach(function (acc) {
+    acc.username = acc.owner
+      .toLowerCase()
+      .split(' ')
+      .map(name => name[0])
+      .join('');
+  }); // forEach is a great case to produce some so called side effects --simply do dome work without returning anything
+};
+createUsernames(accounts);
+console.log(accounts);
+
+// const createUsernames = function (user) {
+//   const username = user
+//     .toLowerCase()
+//     .split(' ')
+//     .map(name => name[0])
+//     .join('');
+//   return username;
+// };
+// createUsernames('Steven Thomas Williams');
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -222,7 +247,7 @@ currenciesUnique.forEach(function (value, _, map) {
 // (_) --means a throwaway variable --variable taht completely unnecessary
 */
 ////////////////////////////////////////////////
-
+/*
 // Coding Challenge 1
 
 // Data 1
@@ -256,3 +281,47 @@ const checkDogs = function (juliaDogs, kateDogs) {
 };
 checkDogs(dogsJulia1, dogsKate1);
 checkDogs(dogsJulia2, dogsKate2);
+*/
+/////////////////////////////////////////////////////
+/*
+// the MAP method
+
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+const euroToUsd = 1.1;
+
+const moveToUsd = movements.map(function (mov) {
+  return mov * euroToUsd;
+});
+
+console.log(movements);
+console.log(moveToUsd);
+
+// for of
+const movementsUSDfor = [];
+for (const mov of movements) movementsUSDfor.push(mov * euroToUsd);
+console.log(movementsUSDfor);
+
+// arrow
+const movementToUsd = movements.map(mov => mov * euroToUsd);
+console.log(movements);
+console.log(movementToUsd);
+
+// map with 3 parameters
+const movementDescription = movements.map(
+  (mov, i) =>
+    `Movement ${i + 1}: You ${mov > 0 ? 'deposited' : 'withdrew'} ${Math.abs(
+      mov
+    )}`
+
+  // if (mov > 0) {
+  //   return `Movement ${i + 1}: You deposite ${mov}`;
+  // } else {
+  //   return `Movement ${i + 1}: You withdrew ${Math.abs(mov)}`;
+  // }
+);
+console.log(movementDescription);
+
+// KIM: completely acceptable to have even more return statement as long as only one of them is executed
+*/
+////////////////////////////////////////////////
