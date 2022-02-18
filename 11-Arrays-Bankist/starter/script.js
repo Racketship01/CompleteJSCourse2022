@@ -73,7 +73,7 @@ const displayMovements = function (movements) {
     const html = `<div class="movements__row">
     <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
     
-    <div class="movements__value">${Math.abs(mov)}</div>
+    <div class="movements__value">${Math.abs(mov)}€</div>
   </div>`;
 
     containerMovements.insertAdjacentHTML('afterbegin', html); // method used to display/attach in webpage(DOM tree) --accepts two string 1st: position of new element we want to attach HTML (function) 2nd: text (string containing the HTML that we want to insert)
@@ -89,6 +89,53 @@ displayMovements(account1.movements);
 // console.log(containerMovements.innerHTML); // text content: simply returns text itself while HTML: returns everything, including the html (all HTML tags will be included)
 /////////////////////////////////////////////////////
 
+// Computing balance --reduce method
+
+const calcPrintBalance = function (movements) {
+  const balance = movements.reduce(function (acc, mov) {
+    const money = (acc += mov);
+    return money;
+  }, 0);
+
+  // const html = `
+  //   <p class="balance__value">${balance}€</p>
+  // </div>`;
+
+  // labelBalance.insertAdjacentHTML('afterend', html);
+
+  labelBalance.textContent = `${balance}€`;
+};
+calcPrintBalance(account1.movements);
+
+/////////////////////////////////////////////////////
+
+// Statistics -- using chain method
+
+const calcDisplaySummary = function (movements) {
+  const income = movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  //console.log(income);
+  labelSumIn.textContent = `${income}€`;
+
+  const outcome = movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(outcome)}€`;
+
+  const interestDeposit = 1.2 / 100;
+  const summary = movements
+    .filter(mov => mov > 0)
+    .map(deposit => deposit * interestDeposit)
+    .filter((int, i, arr) => {
+      // console.log(arr);
+      return int >= 1;
+    })
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = `${Math.abs(summary)}€`;
+};
+calcDisplaySummary(account1.movements);
+//////////////////////////////////////////////////////
 // Computing Username
 
 const createUsernames = function (accs) {
@@ -101,7 +148,7 @@ const createUsernames = function (accs) {
   }); // forEach is a great case to produce some so called side effects --simply do dome work without returning anything
 };
 createUsernames(accounts);
-console.log(accounts);
+//console.log(accounts);
 
 // const createUsernames = function (user) {
 //   const username = user
@@ -325,3 +372,152 @@ console.log(movementDescription);
 // KIM: completely acceptable to have even more return statement as long as only one of them is executed
 */
 ////////////////////////////////////////////////
+/*
+// Filter Method
+
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+const deposit = movements.filter(function (mov, i, arr) {
+  return mov > 0;
+});
+console.log(movements);
+console.log(deposit);
+
+// for of
+const depositFor = [];
+for (const mov of movements) if (mov > 0) depositFor.push(mov);
+console.log(depositFor);
+
+const withdrawals = movements.filter(mov => mov < 0);
+console.log(withdrawals);
+*/
+//////////////////////////////////////////////////////
+/*
+// The Reduce Method
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+console.log(movements);
+const balance = movements.reduce(function (acc, cur, i, arr) {
+  console.log(`Iteration ${i}: ${acc}`);
+  return acc + cur;
+}, 0);
+
+const balance3 = movements.reduce((acc, cur) => acc + cur, 0);
+console.log(balance3);
+// 1st parameter: function (accumulator --(current sum of all the previous values) is the value that keep adding to the current value --acc + curr)
+// 2nd: initial value of the accumulator --(0)
+
+// for of
+let balance2 = 0;
+for (const mov of movements) balance2 += mov;
+console.log(balance2);
+
+// in for of loop --we always need an external variable
+
+// Maximum value --  it doesn't have to be a sum. It could be a multiplication or even something completely different, like a string or an object,
+const max = movements.reduce((acc, mov) => {
+  if (acc > mov) return acc;
+  else return mov;
+}, movements[0]);
+console.log(max);
+*/
+//////////////////////////////////////////////////////
+/*
+// Challenge 2
+// const age1 = [5, 2, 4, 1, 15, 8, 3];
+// const age2 = [16, 6, 10, 5, 6, 1, 4];
+
+const calcAverageHumanAge = function (dogAges) {
+  // 1
+  const dogAgeMap = dogAges.map(function (age) {
+    if (age <= 2) {
+      return 2 * age;
+    } else {
+      return 16 + age * 4;
+    }
+  });
+  // console.log(dogAgeMap);
+
+  // 2
+  const dogAgeFilter = dogAgeMap.filter(age => age >= 18);
+  console.log(dogAgeFilter);
+
+  // 3
+  const aveHumanAgeReduce = dogAgeFilter.reduce(
+    (acc, age, i, arr) => acc + age / arr.length,
+    0
+  );
+  console.log(aveHumanAgeReduce);
+};
+calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]);
+calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]);
+*/
+//////////////////////////////////////////////////////
+/*
+// The Chaining Method
+
+const euroToUsd = 1.1;
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+console.log(movements);
+// PIPELINE
+const totalDeposits = movements
+  .filter(mov => mov > 0)
+  .map((mov, i, arr) => {
+    // console.log(arr);
+    return mov * euroToUsd;
+  })
+  //.map(mov => mov * euroToUsd)
+  .reduce((acc, mov) => acc + mov, 0);
+console.log(totalDeposits);
+
+// we can only chain a method after another if the first one returns an array
+
+// reminders: 1st --not overuse chaining 2nd --try to optimize it 3rd --it is bad practice to chain methods that mutate the underlying original array
+// if we have a huge chain of methods, chained one after the other, we should try to compress all the functionality that they do into as little methods as possible.
+*/
+//////////////////////////////////////////////////////
+/*
+// Challenge 3
+
+const calcAverageHumanAge = ages =>
+  ages
+    .map(age => (age <= 2 ? 2 * age : 16 + age * 4))
+    .filter(age => age >= 18)
+    .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
+
+console.log(calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]));
+console.log(calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
+
+// const array = [15, 16, 17, 18, 19];
+
+// function reducer(previous, current, index, array) {
+//   const returns = previous + current;
+//   console.log(
+//     `previous: ${previous}, current: ${current}, index: ${index}, returns: ${returns}`
+//   );
+//   return returns;
+// }
+
+// array.reduce(reducer);
+*/
+//////////////////////////////////////////////////////
+
+// The Find Method
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+const firstWithdrawal = movements.find(mov => mov < 0);
+console.log(movements);
+console.log(firstWithdrawal);
+
+const account = accounts.find(acc => acc.owner === 'Jessica Davis');
+console.log(account);
+
+// using the Find method, we can then search this array basically to find an object that matches a certain property that we already know.
+
+// for of
+const unique = [];
+for (const acc of accounts) {
+  if (acc.owner === 'Jessica Davis') {
+    unique.push(acc);
+  }
+}
+console.log(unique);

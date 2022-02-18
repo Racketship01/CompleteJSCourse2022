@@ -3429,6 +3429,8 @@ javascriptIsFun = "YES!";
   // Closure will execute variable element inside a function first , when no local variable declared in function, closure will execute variable in the global scope
   ```
 
+## Section 11: Working with Arrays
+
 - Simple Array Method
 
   > methods are simply functions that we can call on objects. So basically, they are functions attached to objects.
@@ -3686,6 +3688,59 @@ javascriptIsFun = "YES!";
     // createUsernames('Steven Thomas Williams');
     ```
 
+  - Computing Balance
+
+    ```js
+    // Computing balance --reduce method
+
+    const calcPrintBalance = function (movements) {
+      const balance = movements.reduce(function (acc, mov) {
+        const money = (acc += mov);
+        return money;
+      }, 0);
+
+      // const html = `
+      //   <p class="balance__value">${balance}€</p>
+      // </div>`;
+
+      // labelBalance.insertAdjacentHTML('afterend', html);
+
+      labelBalance.textContent = `${balance}€`;
+    };
+    calcPrintBalance(account1.movements);
+    ```
+
+  - Statistics --using Chain Method
+
+    ```js
+    // Statistics -- using chain method
+
+    const calcDisplaySummary = function (movements) {
+      const income = movements
+        .filter((mov) => mov > 0)
+        .reduce((acc, mov) => acc + mov, 0);
+      //console.log(income);
+      labelSumIn.textContent = `${income}€`;
+
+      const outcome = movements
+        .filter((mov) => mov < 0)
+        .reduce((acc, mov) => acc + mov, 0);
+      labelSumOut.textContent = `${Math.abs(outcome)}€`;
+
+      const interestDeposit = 1.2 / 100;
+      const summary = movements
+        .filter((mov) => mov > 0)
+        .map((deposit) => deposit * interestDeposit)
+        .filter((int, i, arr) => {
+          console.log(arr);
+          return int >= 1;
+        })
+        .reduce((acc, int) => acc + int, 0);
+      labelSumInterest.textContent = `${Math.abs(summary)}€`;
+    };
+    calcDisplaySummary(account1.movements);
+    ```
+
 - Data Transformations: Map, Filter, Reduce
 
   > these methods use to create new arrays based on transforming data from other arrays
@@ -3744,7 +3799,128 @@ javascriptIsFun = "YES!";
   // KIM: completely acceptable to have even more return statement as long as only one of them is executed
   ```
 
-## Section 11: Working with Arrays
+- The Filter Method
+
+  ```js
+  // Filter Method
+
+  const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+  const deposit = movements.filter(function (mov, i, arr) {
+    return mov > 0;
+  });
+  console.log(movements);
+  console.log(deposit);
+
+  // for of
+  const depositFor = [];
+  for (const mov of movements) if (mov > 0) depositFor.push(mov);
+  console.log(depositFor);
+
+  const withdrawals = movements.filter((mov) => mov < 0);
+  console.log(withdrawals);
+  ```
+
+- The Reduce Method
+
+  ```js
+  // The Reduce Method
+  const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+  console.log(movements);
+  const balance = movements.reduce(function (acc, cur, i, arr) {
+    console.log(`Iteration ${i}: ${acc}`);
+    return acc + cur;
+  }, 0);
+
+  const balance3 = movements.reduce((acc, cur) => acc + cur, 0);
+  console.log(balance3);
+  // 1st parameter: function (accumulator --(current sum of all the previous values) is the value that keep adding to the current value --acc + curr)
+  // 2nd: initial value of the accumulator --(0)
+
+  // for of
+  let balance2 = 0;
+  for (const mov of movements) balance2 += mov;
+  console.log(balance2);
+
+  // in for of loop --we always need an external variable
+
+  // Maximum value --  it doesn't have to be a sum. It could be a multiplication or even something completely different, like a string or an object,
+  const max = movements.reduce((acc, mov) => {
+    if (acc > mov) return acc;
+    else return mov;
+  }, movements[0]);
+  console.log(max);
+  ```
+
+  ![](./img/reduce.png)
+
+  ![](./img/reduce1.png)
+
+  ![](./img/reduce2.png)
+
+  ![](./img/reduce3.png)
+
+- The Magic of Chaining Methods
+
+  ```js
+  // The Chaining Method
+
+  const euroToUsd = 1.1;
+  const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+  console.log(movements);
+  // PIPELINE
+  const totalDeposits = movements
+    .filter((mov) => mov > 0)
+    .map((mov, i, arr) => {
+      // console.log(arr);
+      return mov * euroToUsd;
+    })
+    //.map(mov => mov * euroToUsd)
+    .reduce((acc, mov) => acc + mov, 0);
+  console.log(totalDeposits);
+
+  // we can only chain a method after another if the first one returns an array
+
+  // reminders: 1st --not overuse chaining 2nd --try to optimize it 3rd --it is bad practice to chain methods that mutate the underlying original array
+  // if we have a huge chain of methods, chained one after the other, we should try to compress all the functionality that they do into as little methods as possible.
+  ```
+
+- The Find Method
+
+  > use to retrieve one element of an array based on a condition
+
+  > Find method accepts a condition also accepts a callback function which will then be called as the method loops over the array
+
+  > just like the Filter method, the Find method also needs a callback function that returns a Boolean.
+
+  > unlike the Filter method, the Find method will actually not return a new array but it will only return the first element in the array that satisfies this condition.
+
+  > the Find method is a bit similar to the Filter method, but there are two fundamental differences .First Filter returns all the elements that match the condition while the Find method only returns the first one and second and even more important, the Filter method returns a new array while Find only returns the element itself and not an array,
+
+  > using Find, we can basically find an object in the array based on some property of that object,
+
+  ```js
+  // The Find Method
+  const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+  const firstWithdrawal = movements.find(mov => mov < 0);
+  console.log(movements);
+  console.log(firstWithdrawal);
+
+  const account = accounts.find(acc => acc.owner === 'Jessica Davis');
+  console.log(account);
+
+  // using the Find method, we can then search this array basically to find an object that matches a certain property that we already know.
+
+  // for of
+  const unique = [];
+  for (const acc of accounts) {
+    if (acc.owner === 'Jessica Davis') {
+      unique.push(acc);
+    }
+  }
+  console.log(unique);
+  ```
 
 ## Section 12: Numbers, Dates, Intl and Timers
 
