@@ -11,6 +11,7 @@ const account1 = {
   interestRate: 1.2, // %
   pin: 1111,
 };
+//console.log(account1);
 
 const account2 = {
   owner: 'Jessica Davis',
@@ -64,16 +65,21 @@ const inputClosePin = document.querySelector('.form__input--pin');
 // Project: BANKIST APP
 
 // Creating DOM elements
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = ''; // use to clear/empty entire container then start adding new elements
 
-  movements.forEach(function (mov, i) {
+  // sorting method -- will then order the actual underlying array --actual movements array as it is in the account object (mutated orig array and return mutated array)
+  // false - descending
+  // true - ascending
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (mov, i) {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
 
     const html = `<div class="movements__row">
     <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
     
-    <div class="movements__value">${Math.abs(mov)}€</div>
+    <div class="movements__value">${mov}€</div>
   </div>`;
 
     containerMovements.insertAdjacentHTML('afterbegin', html); // method used to display/attach in webpage(DOM tree) --accepts two string 1st: position of new element we want to attach HTML (function) 2nd: text (string containing the HTML that we want to insert)
@@ -83,7 +89,7 @@ const displayMovements = function (movements) {
     // beforeend position -- (*begin to end) simply be added after the previous one
   });
 };
-displayMovements(account1.movements);
+//displayMovements(account1.movements);
 // Good practice: a lot better to pass data directly into the function than global variables --each function should actually receive the data that it should work with, instead of using a global variable.
 
 // console.log(containerMovements.innerHTML); // text content: simply returns text itself while HTML: returns everything, including the html (all HTML tags will be included)
@@ -91,11 +97,14 @@ displayMovements(account1.movements);
 
 // Computing balance --reduce method
 
-const calcPrintBalance = function (movements) {
-  const balance = movements.reduce(function (acc, mov) {
-    const money = (acc += mov);
-    return money;
-  }, 0);
+const calcPrintBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+
+  // function (acc, mov){
+  //
+  //   const money = (acc += mov);
+  //   return money;
+  // }, 0);
 
   // const html = `
   //   <p class="balance__value">${balance}€</p>
@@ -103,30 +112,30 @@ const calcPrintBalance = function (movements) {
 
   // labelBalance.insertAdjacentHTML('afterend', html);
 
-  labelBalance.textContent = `${balance}€`;
+  labelBalance.textContent = `${acc.balance}€`;
 };
-calcPrintBalance(account1.movements);
+//calcPrintBalance(account1.movements);
 
 /////////////////////////////////////////////////////
 
 // Statistics -- using chain method
 
-const calcDisplaySummary = function (movements) {
-  const income = movements
+const calcDisplaySummary = function (acc) {
+  const income = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
   //console.log(income);
   labelSumIn.textContent = `${income}€`;
 
-  const outcome = movements
+  const outcome = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
   labelSumOut.textContent = `${Math.abs(outcome)}€`;
 
-  const interestDeposit = 1.2 / 100;
-  const summary = movements
+  // const interestDeposit = 1.2 / 100;
+  const summary = acc.movements
     .filter(mov => mov > 0)
-    .map(deposit => deposit * interestDeposit)
+    .map(deposit => (deposit * acc.interestRate) / 100)
     .filter((int, i, arr) => {
       // console.log(arr);
       return int >= 1;
@@ -134,7 +143,118 @@ const calcDisplaySummary = function (movements) {
     .reduce((acc, int) => acc + int, 0);
   labelSumInterest.textContent = `${Math.abs(summary)}€`;
 };
-calcDisplaySummary(account1.movements);
+//calcDisplaySummary(account1.movements);
+//////////////////////////////////////////////////////
+// Implementing Log-in
+
+// refractoring Updated UI
+const updateUI = function (acc) {
+  // display movements
+  displayMovements(acc.movements);
+  // display balance
+  calcPrintBalance(acc);
+  // display summary
+  calcDisplaySummary(acc);
+
+  // not only displays but stored data --should now only be called with the entire account object
+};
+
+// event handlers
+let currentAccount;
+
+btnLogin.addEventListener('click', function (e) {
+  // Prevent form from submitting
+  e.preventDefault();
+  currentAccount = accounts.find(
+    acc => acc.username === inputLoginUsername.value
+  );
+  console.log(currentAccount);
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // display UI and message
+    labelWelcome.textContent = `Welcome back! ${
+      currentAccount.owner.split(' ')[0]
+    }`;
+    // currentAccount --this is simply another variable which points to the same so to the original object in the memory heap (all of these different references to actually point to the exact same objects in the memory heap)
+
+    // Clear input fields
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+
+    containerApp.style.opacity = 100;
+
+    // Update UI
+    updateUI(currentAccount);
+  }
+});
+
+// in HTML the default behavior when we click the submit button is for the page to reload
+//////////////////////////////////////////////////////
+
+// Implementing transfers
+btnTransfer.addEventListener('click', function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    acc => acc.username === inputTransferTo.value
+  );
+  console.log(amount, receiverAcc);
+
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentAccount.balance >= amount &&
+    receiverAcc?.username !== currentAccount.username
+  ) {
+    //console.log('Transfer Valid!');
+
+    // Transfer
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+
+    // Update UI
+    updateUI(currentAccount);
+  }
+
+  // clear fiels
+  inputTransferAmount.value = inputTransferTo.value = '';
+  inputTransferAmount.blur();
+});
+//////////////////////////////////////////////////////
+
+// Implementing Loan Request --using Some method
+
+// our bank has a rule, which says that it only grants a loan if there at least one deposit with at least 10% of the requested loan amount.
+btnLoan.addEventListener('click', function (e) {
+  e.defaultPrevented();
+
+  const amount = Number(inputLoanAmount.value);
+
+  if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
+    // add movement
+    currentAccount.movements.push(amount);
+
+    // update UI
+    updateUI(currentAccount);
+  }
+  inputLoanAmount.value = '';
+  inputLoanAmount.blur();
+});
+// whenever we see or hear the word any, we can already know that it's probably a good use case for the some method.
+//////////////////////////////////////////////////////
+
+// Sort Display Feature --using sort method
+let sorted = false;
+btnSort.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  displayMovements(currentAccount.movements, !sorted);
+
+  // uses NOT operator (!) to reverse current sorted if false or true
+
+  // in every click sorted changes from true to false
+  sorted = !sorted;
+});
 //////////////////////////////////////////////////////
 // Computing Username
 
@@ -159,7 +279,37 @@ createUsernames(accounts);
 //   return username;
 // };
 // createUsernames('Steven Thomas Williams');
+/////////////////////////////////////////////////////
 
+// Closing Account -- using The findindex Method
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  if (
+    inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) === currentAccount.pin
+  ) {
+    const index = accounts.findIndex(
+      acc => acc.username === currentAccount.username
+    );
+    console.log(index);
+
+    // .indexOf(23) only search for a value that is in the array, if contains 23 then its true, if not false
+
+    // delete account
+    accounts.splice(index, 1);
+
+    // Hide UI
+    containerApp.style.opacity = 0;
+  }
+
+  // clear fields
+  inputCloseUsername.value = inputClosePin.value = '';
+  inputClosePin.blur();
+});
+/////////////////////////////////////////////////
+
+// Sorting Array
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -500,7 +650,7 @@ console.log(calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
 // array.reduce(reducer);
 */
 //////////////////////////////////////////////////////
-
+/*
 // The Find Method
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
@@ -521,3 +671,164 @@ for (const acc of accounts) {
   }
 }
 console.log(unique);
+*/
+//////////////////////////////////////////////////////
+/*
+// Some and Every
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+// test for EQUALITY - includes method
+console.log(movements);
+console.log(movements.includes(-130));
+
+// can use the includes method to test if an array includes a certain value.
+
+// test for CONDITION - SOME method
+console.log(movements.some(mov => mov === -130));
+
+const anyDeposits = movements.some(mov => mov > 0);
+console.log(anyDeposits);
+
+// EVERY method
+console.log(movements.every(mov => mov > 0));
+console.log(account4.movements.every(mov => mov > 0));
+
+// Separate callback
+const deposit = mov => mov > 0;
+
+console.log(movements.some(deposit));
+console.log(movements.every(deposit));
+console.log(movements.filter(deposit));
+*/
+//////////////////////////////////////////////////////
+/*
+// Flat an d FlatMap Method
+
+// FLAT
+const arr = [[1, 2, 3], [4, 5, 6], 7, 8];
+console.log(arr.flat()); // no callback function
+
+const arrDeep = [[[1, 2], 3], [4, [5, 6]], 7, 8];
+console.log(arrDeep.flat(2)); // flat method did'nt work but if declared deep in argument it will
+
+const accountMovements = accounts.map(acc => acc.movements);
+console.log(accountMovements);
+
+const allMovements = accountMovements.flat();
+console.log(allMovements);
+
+const sumAllMovements = allMovements.reduce((acc, mov) => acc + mov, 0);
+console.log(sumAllMovements);
+
+const chainMovement = accounts
+  .map(acc => acc.movements)
+  .flat()
+  .reduce((acc, mov) => acc + mov, 0);
+console.log(chainMovement);
+
+// FLATMAP
+const chainMovement2 = accounts
+  .flatMap(acc => acc.movements)
+  .reduce((acc, mov) => acc + mov, 0);
+console.log(chainMovement2);
+*/
+//////////////////////////////////////////////////////
+/*
+// Sorting Array
+
+// strings
+const owners = ['Jonas', 'Adam', 'Zach', 'Martha'];
+console.log(owners.sort()); // arranged alphabetically
+
+// numbers
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+console.log(movements);
+// console.log(movements.sort()); // not ordered  --sort method does the sorting based on strings
+
+// RULE
+// return < 0 = A before B (keep order)
+// return > 0 = B before A (switch order)
+
+// ASCENDING
+// movements.sort((a, b) => {
+//   // ascending order -- small to large
+//   if (a > b) return 1;
+//   if (b < a) return -1;
+
+//   // // mdn
+//   // if (a < b) return -1;
+//   // if (a > b) return 1;
+// }); //need to use a callback function for number to be sort
+
+movements.sort((a, b) => a - b);
+console.log(movements);
+// a: current value
+// b: next value
+
+// DESCENDING
+// movements.sort((a, b) => {
+//   // ascending order -- small to large
+//   if (a > b) return -1;
+//   if (a < b) return 1;
+// });
+movements.sort((a, b) => b - a);
+console.log(movements);
+
+// mixed arrays --strings and number
+*/
+//////////////////////////////////////////////////////
+
+// More Ways of Creating and Filling Arrays
+
+const arr = [1, 2, 3, 4, 5, 6, 7];
+console.log(new Array([1, 2, 3, 4, 5, 6, 7]));
+
+// empty array + fill method
+const x = new Array(7);
+console.log(x);
+// console.log(x.map(() => 5));
+
+x.fill(1);
+x.fill(1, 3, 5); // same with slice method --1st parameter (1) will be the fill element --can specify a begin parameter (3) --and can specify end parameter (5) the final index here is not gonna be included in the array.
+console.log(x);
+
+// not empty
+arr.fill(23, 2, 6);
+console.log(arr);
+
+// Create new array programmatically --using Array.from()
+const y = Array.from({ length: 7 }, () => 1); // not using the from as a method on array instead we are using it on the Array() constructor (new Array())
+
+// array here is exactly the same as new Array(), so again, array here is a function and then on this function object, we call the from() method.
+
+// 1st: pass in an object with the length property
+// 2nd: mapping function (what will return to new array )
+console.log(y); // [11111111]
+
+const z = Array.from({ length: 7 }, (_, i) => i + 1);
+console.log(z); // [1234567]
+
+// NODELIST
+// querySelectorAll() --returns something called a Nodelist --something like an array which contains all selected elements but its not a real array
+
+// Note:  if we actually wanted to use a real array method like that on a NodeList, we would first need to convert the NodeList to an array. And for that Array.from() is perfect.
+
+// movement array not stored in our code --first need get them first in UI and do the calculation
+
+// const movementsUI = Array.from(document.querySelectorAll('.movements__value'));
+// console.log(movementsUI);
+
+labelBalance.addEventListener('click', function () {
+  const movementsUI = Array.from(
+    document.querySelectorAll('.movements__value'),
+    el => Number(el.textContent.replace('€', ''))
+  );
+  console.log(movementsUI);
+
+  const movementsUI2 = [...document.querySelectorAll('.movements__value')];
+  console.log(movementsUI2);
+});
+
+// We used a Array.from() to create an array from the result of the querySelectorAll() which is a NodeList, which is not really an array, but an array like structure and that array like structure can easily be converted to an array using Array.from().
+
+// And then as a second step, we even included a mapping function, which then transforms that initial array to an array exactly as we want it.
