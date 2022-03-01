@@ -4317,6 +4317,83 @@ javascriptIsFun = "YES!";
 
   ![](./img/arraymethodsum.png)
 
+- Array Method: Practice
+
+  ```js
+  // Array Method Practice
+
+  // 1.
+  const bankDepositSum = accounts
+    .flatMap((acc) => acc.movements)
+    .filter((mov) => mov > 0)
+    .reduce((sum, cur) => sum + cur, 0);
+
+  console.log(bankDepositSum);
+
+  // 2.
+  // const numDeposit1000 = accounts
+  //   .flatMap(acc => acc.movements)
+  //   .filter(mov => mov >= 1000).length;
+
+  const numDeposit1000 = accounts
+    .flatMap((acc) => acc.movements)
+    .filter((mov) => mov >= 1000)
+    // .reduce((count, cur) => (cur >= 100 ? count + 1 : count), 0);
+    .reduce((count, cur) => (cur >= 100 ? ++count : count), 0); // use prefic plus plus as solution ++count
+  console.log(numDeposit1000);
+  // we can even use reduce to basically simply count something in an array. So what's important to keep in mind is that we have this value (0) outside. So this accumulator, which we can use to reduce the array down to anything that we want.
+
+  // prefix ++operator
+  let a = 10;
+  console.log(a++);
+  // the plus plus operator does actually increment the value but it still returns the previous value.
+  console.log(a);
+  // So if we now log the a again here, you will see that now it is indeed 11.
+
+  // 3.
+  // reduce method returns new object
+  const { deposits, withdrawals } = accounts
+    .flatMap((acc) => acc.movements)
+    .reduce(
+      (sums, cur) => {
+        // cur > 0 ? (sums.deposits += cur) : (sums.withrawals += cur);
+        sums[cur > 0 ? "deposits" : "withdrawals"] += cur;
+        return sums;
+      },
+      { deposits: 0, withdrawals: 0 }
+    );
+  console.log(deposits, withdrawals);
+
+  // 4.
+  // this is a nice title -> This Is a Nice Title
+  const convertTitleCase = function (title) {
+    const capitalize = (str) => str[0].toUpperCase() + str.slice(1);
+
+    const exceptions = [
+      "a",
+      "an",
+      "and",
+      "the",
+      "but",
+      "or",
+      "on",
+      "in",
+      "with",
+    ];
+
+    const titleCase = title
+      .toLowerCase()
+      .split(" ")
+      .map((word) => (exceptions.includes(word) ? word : capitalize(word)))
+      .join(" ");
+
+    return capitalize(titleCase);
+  };
+  console.log(convertTitleCase("this is a nice title"));
+  console.log(convertTitleCase("this is a LONG title but not too long"));
+  console.log(convertTitleCase("and here is another title with an EXAMPLE"));
+  ```
+
 ## Section 12: Numbers, Dates, Intl and Timers
 
 ## Section 13: Advanced DOM and Events

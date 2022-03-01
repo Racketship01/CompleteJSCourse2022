@@ -777,7 +777,7 @@ console.log(movements);
 // mixed arrays --strings and number
 */
 //////////////////////////////////////////////////////
-
+/*
 // More Ways of Creating and Filling Arrays
 
 const arr = [1, 2, 3, 4, 5, 6, 7];
@@ -832,3 +832,135 @@ labelBalance.addEventListener('click', function () {
 // We used a Array.from() to create an array from the result of the querySelectorAll() which is a NodeList, which is not really an array, but an array like structure and that array like structure can easily be converted to an array using Array.from().
 
 // And then as a second step, we even included a mapping function, which then transforms that initial array to an array exactly as we want it.
+*/
+////////////////////////////////////////////////////
+/*
+// Array Method Practice
+
+// 1.
+const bankDepositSum = accounts
+  .flatMap(acc => acc.movements)
+  .filter(mov => mov > 0)
+  .reduce((sum, cur) => sum + cur, 0);
+
+console.log(bankDepositSum);
+
+// 2.
+// const numDeposit1000 = accounts
+//   .flatMap(acc => acc.movements)
+//   .filter(mov => mov >= 1000).length;
+
+const numDeposit1000 = accounts
+  .flatMap(acc => acc.movements)
+  .filter(mov => mov >= 1000)
+  // .reduce((count, cur) => (cur >= 100 ? count + 1 : count), 0);
+  .reduce((count, cur) => (cur >= 100 ? ++count : count), 0); // use prefic plus plus as solution ++count
+console.log(numDeposit1000);
+// we can even use reduce to basically simply count something in an array. So what's important to keep in mind is that we have this value (0) outside. So this accumulator, which we can use to reduce the array down to anything that we want.
+
+// prefix ++operator
+let a = 10;
+console.log(a++);
+// the plus plus operator does actually increment the value but it still returns the previous value.
+console.log(a);
+// So if we now log the a again here, you will see that now it is indeed 11.
+
+// 3.
+// reduce method returns new object
+const { deposits, withdrawals } = accounts
+  .flatMap(acc => acc.movements)
+  .reduce(
+    (sums, cur) => {
+      // cur > 0 ? (sums.deposits += cur) : (sums.withrawals += cur);
+      sums[cur > 0 ? 'deposits' : 'withdrawals'] += cur;
+      return sums;
+    },
+    { deposits: 0, withdrawals: 0 }
+  );
+console.log(deposits, withdrawals);
+
+// 4.
+// this is a nice title -> This Is a Nice Title
+const convertTitleCase = function (title) {
+  const capitalize = str => str[0].toUpperCase() + str.slice(1);
+
+  const exceptions = ['a', 'an', 'and', 'the', 'but', 'or', 'on', 'in', 'with'];
+
+  const titleCase = title
+    .toLowerCase()
+    .split(' ')
+    .map(word => (exceptions.includes(word) ? word : capitalize(word)))
+    .join(' ');
+
+  return capitalize(titleCase);
+};
+console.log(convertTitleCase('this is a nice title'));
+console.log(convertTitleCase('this is a LONG title but not too long'));
+console.log(convertTitleCase('and here is another title with an EXAMPLE'));
+*/
+///////////////////////////////////////////////////////
+
+// Challenge 4
+const dogs = [
+  { weight: 22, curFood: 250, owners: ['Alice', 'Bob'] },
+  { weight: 8, curFood: 200, owners: ['Matilda'] },
+  { weight: 13, curFood: 275, owners: ['Sarah', 'John'] },
+  { weight: 32, curFood: 340, owners: ['Michael'] },
+];
+
+// 1.
+const recomFood = function (foods) {
+  foods.forEach(function (food) {
+    food.recommendedFood = Math.trunc(food.weight ** 0.75 * 28);
+  });
+};
+console.log(recomFood(dogs));
+console.log(dogs);
+
+// 2.
+const findSarah = dogs.find(dog => dog.owners.includes('Sarah'));
+console.log(findSarah);
+console.log(
+  `Sarah's dog is eating too ${
+    findSarah.curFood > findSarah.recommendedFood ? 'much' : 'little'
+  }`
+);
+
+// 3.
+const ownersEatTooMuch = dogs
+  .filter(dog => dog.curFood > dog.recommendedFood)
+  .flatMap(dog => dog.owners);
+console.log(ownersEatTooMuch);
+
+const ownersEatTooLittle = dogs
+  .filter(dog => dog.curFood < dog.recommendedFood)
+  .flatMap(dog => dog.owners);
+console.log(ownersEatTooLittle);
+
+// 4.
+console.log(
+  `"${ownersEatTooMuch.join(
+    ' and '
+  )}'s dogs eat too much!" and "${ownersEatTooLittle.join(
+    ' and '
+  )}'s dogs eat too little!"`
+);
+
+// 5.
+console.log(dogs.some(dog => dog.curFood === dog.recommendedFood));
+
+// 6.
+const checkEatingOk = dog =>
+  dog.curFood > dog.recommendedFood * 0.9 &&
+  dog.curFood < dog.recommendedFood * 1.1;
+console.log(dogs.some(checkEatingOk));
+
+// 7.
+
+console.log(dogs.filter(checkEatingOk));
+
+// 8.
+const dogsSort = dogs
+  .slice()
+  .sort((a, b) => a.recommendedFood - b.recommendedFood);
+console.log(dogsSort);
