@@ -4396,6 +4396,117 @@ javascriptIsFun = "YES!";
 
 ## Section 12: Numbers, Dates, Intl and Timers
 
+- Converting and Checking Numbers
+
+  > in JavaScript, all numbers are presented internally as floating point numbers. --always as decimals
+
+  > numbers are represented internally in a 64 base 2 format. So that means that numbers are always stored in a binary format. So basically, they're only composed of zeros and ones.
+
+  > in this binary form, it is very hard to represent some fractions that are very easy to represent in the base 10 system that we are used to. So base 10 is basically the numbers from zero to nine, while binary is base 2 and so that's the numbers zero and one.
+
+  ```js
+  console.log(23 === 23.0);
+
+  // Base 10: 0 - 9 (1/10 = 0.1) (3/10 = 3.33333333 infinite fraction)
+
+  // Binary base 2: 0 - 1
+  console.log(0.1 + 0.2); //infinite fraction
+  console.log(0.1 + 0.2 === 0.3);
+
+  // Conversion
+  console.log(Number("23"));
+  console.log(+"23");
+
+  // Parsing
+  //  every function is also an object. And this number object here has some methods to do parsing.
+  console.log(Number.parseInt("30px", 10)); // 30
+  console.log(Number.parseInt("e23", 10)); // NaN
+
+  // the parseInt function actually accepts a second argument, which is the so-called radix. And the radix is the base of the numeral system that we are using.
+
+  // Floating
+  console.log(Number.parseInt(" 2.5rem ")); // 2
+  console.log(Number.parseFloat(" 2.5rem ")); // 2.5 -- uses whenever need to read value out of string
+
+  // Global function
+  console.log(parseFloat(" 2.5rem ")); // 2.5
+
+  // NaN -- use to check if value is NOT a number
+  console.log(Number.isNaN(23)); // F
+  console.log(Number.isNaN("23")); // F
+  console.log(Number.isNaN(+"23x")); // T
+  console.log(Number.isNaN(23 / 0)); // F
+
+  // isFinite -- ultimate method to check if any value is a real number not a string
+  console.log(Number.isFinite(23)); // T
+  console.log(Number.isFinite("23")); // F
+  console.log(Number.isFinite(+"23X")); // F
+  console.log(Number.isFinite(23 / 0)); // F
+
+  // isInteger --use to check if the value is integer
+  console.log(Number.isInteger(23)); // T
+  console.log(Number.isInteger(23.0)); // T
+  console.log(Number.isInteger(23 / 0)); // F
+  ```
+
+- Math and Rounding
+
+  ```js
+  // Math and Rounding
+
+  // Square root
+  console.log(Math.sqrt(25)); // 5
+  console.log(25 ** (1 / 2)); // 5
+  console.log(8 ** (1 / 3)); // 2
+
+  // max
+  console.log(Math.max(5, 18, 23, 11, 2));
+  console.log(Math.max(5, 18, '23', 11, 2));
+  console.log(Math.max(5, 18, '23px', 11, 2));
+
+  // min
+  console.log(Math.min(5, 18, 23, 11, 2));
+
+  // pie - calculate the area of a circle with (10px in css) radius
+  console.log(Math.PI * Number.parseFloat('10px') ** 2);
+
+  // Math.random() 0...1 -- starts with 0 * number need to randomize plus 1
+  console.log(Math.trunc(Math.random() * 6) + 1);
+
+  // generate random integers between two values
+  const randomInt = (min, max) =>
+    Math.floor(Math.random() * (max - min) + 1) + min;
+  // 0...1 -> 0...(max - min) -> min...(max - min + min) -> min...max
+  console.log(randomInt(10, 20));
+  // how we end up with a nice function which will give us always a number that's going to stay between min and max.
+
+  // Rounding Integers -- all method does type coersion
+  console.log(Math.round(23.3));
+  console.log(Math.round(23.9));
+
+  console.log(Math.ceil(23.3)); // 23 -- rounded up
+  console.log(Math.ceil(23.9)); // 24
+
+  console.log(Math.floor(23.3)); //23 -- rounded down -- works with both positive and negative numbers
+  console.log(Math.floor(23.9)); // 23
+
+  console.log(Math.trunc(23.3)); // 23
+
+  console.log(Math.trunc(-23.3)); // -23 --same with floor in dealing positive number but never work negative numbers
+  console.log(Math.floor(-23.9)); // 23
+
+  // Rounding Decimals -- decimals it works differently than with integers
+  console.log((2.7).toFixed(0)); // '3' --toFixed always return a string and not a number
+  console.log((2.7).toFixed(3)); // '2.700' --adds two zeros for decimal place of 3
+  console.log((2.345).toFixed(2)); // '2.35'
+  console.log(+(2.345).toFixed(2)); // 2.35 --convert string into number
+
+  // Does this here works in a similar way than the string methods?
+  // primitives actually don't have methods. And so behind the scenes, JavaScript will do boxing.
+
+  // And boxing is to basically transform this to a number object, then call the method on that object. And then once the operation is finished it will convert it back to a primitive,
+
+  ```
 ## Section 13: Advanced DOM and Events
 
 ## Section 14: OOP with JS
