@@ -4461,14 +4461,14 @@ javascriptIsFun = "YES!";
 
   // max
   console.log(Math.max(5, 18, 23, 11, 2));
-  console.log(Math.max(5, 18, '23', 11, 2));
-  console.log(Math.max(5, 18, '23px', 11, 2));
+  console.log(Math.max(5, 18, "23", 11, 2));
+  console.log(Math.max(5, 18, "23px", 11, 2));
 
   // min
   console.log(Math.min(5, 18, 23, 11, 2));
 
   // pie - calculate the area of a circle with (10px in css) radius
-  console.log(Math.PI * Number.parseFloat('10px') ** 2);
+  console.log(Math.PI * Number.parseFloat("10px") ** 2);
 
   // Math.random() 0...1 -- starts with 0 * number need to randomize plus 1
   console.log(Math.trunc(Math.random() * 6) + 1);
@@ -4505,8 +4505,84 @@ javascriptIsFun = "YES!";
   // primitives actually don't have methods. And so behind the scenes, JavaScript will do boxing.
 
   // And boxing is to basically transform this to a number object, then call the method on that object. And then once the operation is finished it will convert it back to a primitive,
-
   ```
+
+- The Remainder (%)
+
+  > simply returns the remainder of a division
+
+  ```js
+  // Remainder Operator
+  console.log(5 % 2); // 1
+  console.log(5 / 2); // 5 =  2 * 2 + 1
+
+  console.log(8 % 3); // 2
+  console.log(8 / 3); // 8 = 2 * 3 + 2
+
+  // When number is even ? if its divisible by two --divisible by two means that if we divide it by two,remainder is zero
+
+  console.log(6 % 2); // 0
+  console.log(6 / 2); // 3
+
+  console.log(7 % 2); // 1
+  console.log(7 / 2); // 3 * 2 + 1
+
+  const isEven = (n) => n % 2;
+  console.log(8);
+  console.log(23);
+  console.log(514);
+
+  labelBalance.addEventListener("click", function () {
+    [...document.querySelectorAll(".movements__row")].forEach(function (
+      row,
+      i
+    ) {
+      // 0, 2, 4, 6
+      if (i % 2 === 0) row.style.backgroundColor = "orangered";
+      // 0, 3, 6, 9
+      if (i % 3 === 0) row.style.backgroundColor = "blue";
+    });
+  });
+
+  // every Nth time, then it is a good idea to use the remainder operator for that.
+  ```
+
+- Numeric Separator
+
+  > Starting from year's 2021. We can use a feature called "Numeric Separators" to format numbers in a way that is easier for us, or for other developers to read and to understand.
+
+  > Numeric separator only works in between numbers not in start nor end. Also one underscore (\_) are valid.
+
+  ```js
+  // Numeric Separator
+
+  // 287, 460, 000, 000
+  const diameter = 287_460_000_000;
+  console.log(diameter);
+
+  const priceCents = 345_99;
+  console.log(priceCents);
+
+  const transferFee1 = 15_00; // 15
+  const transferFee2 = 1_500; // 1500
+
+  const PI = 3.14_15;
+  console.log(PI); // 3.
+
+  console.log(Number("230_000")); // NaN
+  // should really only use, these numeric separators, when you are writing down numbers
+
+  // If you need to store a number in a string, for example, in an API, or if you get a number as a string from an API, you should not use underscores in there, because then JavaScript will not be able to parse the number correctly out of that string.
+
+  console.log(parseInt("230_000")); // 230 --Only the parts that is here in front of the underscore. Everything else will then be ignored.
+  ```
+
+- Working with BigInt
+
+  > a special type of integers that was introduced in yr 2020
+
+  > numbers are represented internally as 64 bits. And that means that there are exactly 64 ones or zeros to represent any given number
+
 ## Section 13: Advanced DOM and Events
 
 ## Section 14: OOP with JS
