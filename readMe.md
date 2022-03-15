@@ -4797,6 +4797,30 @@ javascriptIsFun = "YES!";
   }, 1000);
   ```
 
+- How DOM really works (how DOM is organized internally)
+
+  - DOM is basically the interface between all JS code and browser or more specificially HTML Documents
+
+  ![](./img/advancedDOM.png)
+
+  - some nodes are HTML elements but others are just text --this is really important to understand because all these DOM methods and properties are organized into these different types of objects.
+
+  ![](./img/advancedDOM.png)
+
+  - Rule: Text Type --Everything that's in the HTML has to go into DOM as well
+  - Element Type --Gives each HTML access to a ton of useful properties such as innerHTML, classList, children or parent element --each element will be represented internally as an object
+  - Now just to make this complete, the element type has internally an HTML element, child type. And that element type itself has exactly one child type for each HTML element that exists in HTML. So we have a special type for buttons, a special type for images,for links, and so on and so forth.
+
+  ![](./img/advancedDOM1.png)
+
+  - Inheritance --makes all DOM works --inheritance means that all the child types will also get acces to the methods and properties of all their parent node types e.g HTML element will get access to everything from element type like innerHTML or classList or other methods and properties
+
+  - DOM Manipulation --just another type of node so it contains important method such as querySelector()--available both document and element types, createElement() and getElementById()
+
+  - EventTarget --parent of both node type and also window node type --can call addEventListener on every node type in DOM API
+
+  ![](./img/advancedDOM2.png)
+
 ## Section 13: Advanced DOM and Events
 
 ## Section 14: OOP with JS
