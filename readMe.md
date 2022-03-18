@@ -4995,6 +4995,79 @@ javascriptIsFun = "YES!";
   });
   ```
 
+- Types of Events and Events Handlers
+
+  ```js
+  // Types of Events and Events Handlers
+  const h1 = document.querySelector("h1");
+
+  // addEventListener() -- allows us to add multiple event listeners to the same event -- can also remove an event handler
+  const alertH1 = function (e) {
+    alert("addEventListener: Great you are reading the heading !");
+
+    // h1.removeEventListener('mouseenter', alertH1)
+  };
+
+  h1.addEventListener("mouseenter", alertH1);
+  setTimeout(() => h1.removeEventListener("mouseenter", alertH1), 3000);
+
+  // on-event property
+  // h1.onmouseenter = function (e) {
+  //   alert('addEventListener: Great you are reading the heading !');
+  // };
+  ```
+
+- Event Propagation: Bubbling and Capturing
+
+  - Capturing Phase -- events are captured when they come down from the document route all the way to the target, but our event handlers are not picking up these events during the capture phase (it's only listening for events in the bubbling phase, but not in the capturing phase.) NOTE: the default behavuor of addEventListener() method is capturing phase
+  - Target Phase --as soon as the event reaches the target, event listeners wait for a certain event to happen as soon as the event occur ('click') it runs the attached callback function.
+  - Bubbling Phase -- after reaching the target, the event then actually travels all the way up to the document route again, NOTE: can be very useful for something called event delegation
+
+  - \*\* Why are we learning about all this detail? Well, it is indeed very important because basically, it's as if the event also happened in each of the parent elements.
+
+  ![](./img/bubbling.png)
+
+- Event Propagation in Practice
+
+  ```js
+  // Event Propagation in Practice
+
+  // rgb(255,255,255)
+  const randomInt = (min, max) => Math.floor(Math.random() * (max - min) + 1);
+  const randomColor = () =>
+    `rgb(${randomInt(0, 255)},${randomInt(0, 255)},${randomInt(0, 255)}) `;
+  // console.log(randomColor(0, 255));
+
+  document.querySelector(".nav__link").addEventListener("click", function (e) {
+    this.style.backgroundColor = randomColor();
+    console.log("LINK", e.target, e.currentTarget);
+    console.log(e.currentTarget === this); // True
+
+    // Stop event propagation
+    // e.stopPropagation();
+  });
+  document.querySelector(".nav__links").addEventListener("click", function (e) {
+    this.style.backgroundColor = randomColor();
+    console.log("CONTAINER", e.target, e.currentTarget);
+  });
+
+  //  if we really do want to catch events during the capturing phase, we can define a third parameter in the addEventlistener function. If the third parameter is set to TRUE, the event handler will no longer listen to bubbling events but instead to capturing events
+  document.querySelector(".nav").addEventListener(
+    "click",
+    function (e) {
+      this.style.backgroundColor = randomColor();
+      console.log("NAV", e.target, e.currentTarget);
+    },
+    false
+  ); // this element is now listening for the event (like target phase) as it travels down from DOM, while the other ones (nav__link & nav__links) are listening for events as it travels back up
+
+  // **e.target --the target is essentially where the event originated. So where the event first(actually) happened. So this is not the element on which the handler is actually attached
+  // **e.currentTarget --indeed the element on which the event handler is attached
+  // NOTE: noticed that the currentTarget is exactly the same as the this keyword. So, the this keyword is also the one pointing to the element on which the EventListener is attached to.
+  ```
+
+- Event Delegation: Implementing Page Navigation
+
 ## Section 14: OOP with JS
 
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
