@@ -48,6 +48,30 @@ btnScrollTo.addEventListener('click', function (e) {
 });
 /////////////////////////////////////////////////////////
 // Page Navigation : Event Delegation
+// event delegation: use in event bubble up by simply putting eventlistener on a common parent of all the elements that we are interested in, then we can basically catch that event in the commen parent element
+
+// document.querySelectorAll('.nav__link').forEach(function (el) {
+//   el.addEventListener('click', function (e) {
+//     e.preventDefault();
+//     const id = this.getAttribute('href');
+//     console.log(id);
+//     document.querySelector(id).scrollIntoView({ behavior: 'smooth' });
+//   });
+// });
+
+// 1. Add event listener to common parent element
+// 2. Determine what element originated the event (event created)
+document.querySelector('.nav__links').addEventListener('click', function (e) {
+  e.preventDefault();
+  // console.log(e.target);
+
+  // Matching strategy
+  if (e.target.classList.contains('nav__link')) {
+    const id = e.target.getAttribute('href');
+    console.log(id);
+    document.querySelector(id).scrollIntoView({ behavior: 'smooth' });
+  }
+});
 
 ////////////////////////////////////////////////////////
 
@@ -257,4 +281,38 @@ document.querySelector('.nav').addEventListener(
 // **e.currentTarget --indeed the element on which the event handler is attached
 // NOTE: noticed that the currentTarget is exactly the same as the this keyword. So, the this keyword is also the one pointing to the element on which the EventListener is attached to.
 */
-////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+
+// DOM Traversing
+const h1 = document.querySelector('h1');
+
+// Going DOWNWARDS : --child element
+console.log(h1.querySelectorAll('.highlight'));
+console.log(h1.childNodes); // nodelist
+console.log(h1.children); // HTML collection --works only on direct children
+h1.firstElementChild.style.color = 'white';
+h1.lastElementChild.style.color = 'orangered';
+
+// Going UPWARDS : --parent element
+console.log(h1.parentNode);
+console.log(h1.parentElement);
+
+h1.closest('.header').style.background = 'var(  --gradient-secondary)'; //closest parent element that has this class and simply applied all style to that element
+
+// if selector actually matches the element on which calling closest, its gonna be the return
+
+h1.closest('h1').style.background = 'var(  --gradient-primary)';
+
+// closest -- use to find parent element in a multiple same elements. Opposite of querySelector, both receives a query string as an input but querySelector, finds children, no matter how deep in the Dom tree, while the closest method finds parents. And also no matter how far up in the Dom tree.
+
+// Gong SIDEWAYS -- siblings element
+console.log(h1.previousElementSibling);
+console.log(h1.nextElementSibling);
+
+console.log(h1.previousSibling);
+console.log(h1.nextSibling);
+
+console.log(h1.parentElement.children); // all siblings
+[...h1.parentElement.children].forEach(function (el) {
+  if (el !== h1) el.style.transform = 'scale(0.5)';
+});
