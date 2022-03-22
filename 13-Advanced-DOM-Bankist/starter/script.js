@@ -75,6 +75,71 @@ document.querySelector('.nav__links').addEventListener('click', function (e) {
 
 ////////////////////////////////////////////////////////
 
+// Building a Tabbed Component
+const tabs = document.querySelectorAll('.operations__tab');
+const tabsContainer = document.querySelector('.operations__tab-container');
+const tabsContent = document.querySelectorAll('.operations__content');
+
+// tabs.forEach(t =>
+//   t.addEventListener('click', function () {
+//     console.log('TAB');
+//   })
+// );
+
+// use event delegation
+tabsContainer.addEventListener('click', function (e) {
+  const clicked = e.target.closest('.operations__tab');
+  // console.log(clicked);
+
+  // Guard clause --an if statement which will return early if some condition matches
+  if (!clicked) return; // ignoring null
+
+  // Active tab
+  tabs.forEach(t => t.classList.remove('operations__tab--active'));
+  clicked.classList.add('operations__tab--active');
+
+  // Activate content Area
+  tabsContent.forEach(c => c.classList.remove('operations__content--active'));
+  document
+    .querySelector(`.operations__content--${clicked.dataset.tab}`)
+    .classList.add('operations__content--active');
+});
+
+// Null --is the results of the closest method when there is no matching parent element be found
+// NOTE: the whole idea when we build components like this is to just add and remove classes as necessary to manipulate the content to our needs.
+//////////////////////////////////////////////////////////////
+
+// Menu fade animation -- Passing Arguments to Event Handlers
+const nav = document.querySelector('.nav');
+const handleHover = function (e) {
+  if (e.target.classList.contains('nav__link')) {
+    const link = e.target;
+    const siblings = link.closest('nav').querySelectorAll('.nav__link');
+    const logo = link.closest('nav').querySelector('img');
+
+    siblings.forEach(el => {
+      if (el !== link) el.style.opacity = this;
+    });
+    // logo.style.opacity = opacity;
+  }
+};
+
+// passing "argument" into handler
+nav.addEventListener('mouseover', handleHover.bind(0.5));
+nav.addEventListener('mouseout', handleHover.bind(1));
+
+// nav.addEventListener('mouseover', function (e) {
+//   handleHover(e, 0.5);
+// });
+
+// nav.addEventListener('mouseout', function (e) {
+//   handleHover(e, 1);
+// });
+
+// mouseenter not bubbles
+// this keyword is equal to current target
+// any handler function can only ever have one real argument (only one real parameter )
+////////////////////////////////////////////////////
 // console.log(document.open());
 /*
 // Selecting, Creating and Deleting Document
@@ -282,7 +347,7 @@ document.querySelector('.nav').addEventListener(
 // NOTE: noticed that the currentTarget is exactly the same as the this keyword. So, the this keyword is also the one pointing to the element on which the EventListener is attached to.
 */
 ///////////////////////////////////////////////////////////
-
+/*
 // DOM Traversing
 const h1 = document.querySelector('h1');
 
@@ -316,3 +381,5 @@ console.log(h1.parentElement.children); // all siblings
 [...h1.parentElement.children].forEach(function (el) {
   if (el !== h1) el.style.transform = 'scale(0.5)';
 });
+*/
+////////////////////////////////////////////////////////////

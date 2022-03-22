@@ -5138,6 +5138,43 @@ javascriptIsFun = "YES!";
 
 - Building a Tab Component
 
+  ```js
+  // Building a Tabbed Component
+  const tabs = document.querySelectorAll(".operations__tab");
+  const tabsContainer = document.querySelector(".operations__tab-container");
+  const tabsContent = document.querySelectorAll(".operations__content");
+
+  // tabs.forEach(t =>
+  //   t.addEventListener('click', function () {
+  //     console.log('TAB');
+  //   })
+  // );
+
+  // use event delegation
+  tabsContainer.addEventListener("click", function (e) {
+    const clicked = e.target.closest(".operations__tab");
+    // console.log(clicked);
+
+    // Guard clause --an if statement which will return early if some condition matches
+    if (!clicked) return; // ignoring null
+
+    // Active tab
+    tabs.forEach((t) => t.classList.remove("operations__tab--active"));
+    clicked.classList.add("operations__tab--active");
+
+    // Activate content Area
+    tabsContent.forEach((c) =>
+      c.classList.remove("operations__content--active")
+    );
+    document
+      .querySelector(`.operations__content--${clicked.dataset.tab}`)
+      .classList.add("operations__content--active");
+  });
+
+  // Null --is the results of the closest method when there is no matching parent element be found
+  // NOTE: the whole idea when we build components like this is to just add and remove classes as necessary to manipulate the content to our needs.
+  ```
+
 ## Section 14: OOP with JS
 
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
@@ -5149,3 +5186,9 @@ javascriptIsFun = "YES!";
 ## Section 18: Forkify App: Building a Modern Application
 
 ## Section 19: Setting Up Git and Deployment
+
+# Note
+
+## Differences Between Functional Programming vs OOP
+
+- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in functional programming is a declarative programming model, while object-oriented programming uses the imperative programming model. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key elements.
