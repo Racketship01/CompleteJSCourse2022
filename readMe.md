@@ -5175,6 +5175,120 @@ javascriptIsFun = "YES!";
   // NOTE: the whole idea when we build components like this is to just add and remove classes as necessary to manipulate the content to our needs.
   ```
 
+- Implementing Sticky Navigation
+
+  ```js
+  // Implementing Sticky Navigation
+
+    const initialCoords = section1.getBoundingClientRect();
+
+    window.addEventListener('scroll', function (e) {
+      console.log(window.scrollY);
+
+      if (window.scrollY > initialCoords.top) nav.classList.add('sticky');
+      else nav.classList.remove('sticky');
+    });
+    // sroll --on window object and not at the event
+    */
+
+    // A better way: The intersection observer API
+    const navHeight = nav.getBoundingClientRect().height;
+    console.log(navHeight);
+
+    const header = document.querySelector('.header');
+
+    const stickyNavCb = function (entries) {
+      const [entry] = entries;
+      console.log(entry);
+
+      if (!entry.isIntersecting) nav.classList.add('sticky');
+      else nav.classList.remove('sticky');
+    };
+
+    const observer = new IntersectionObserver(stickyNavCb, {
+      root: null,
+      threshold: 0,
+      rootMargin: `-${navHeight}px`, // rootMargin --is a box of 90px that will be applied outside of our target element
+    });
+    observer.observe(header);
+
+    /*
+    const obsCallback = function (entries, observer) {
+      entries.forEach(entry => {
+        console.log(entry);
+      });
+    }; // callback --get called each time the observed element (target) is intersecting the root at the threshold that we defined --called when the threshold is passed when moving into and out of the view
+    // entries --an array of the threshold entries
+
+    // intersectingRatio === threshold & isIntersecting === true
+
+    const obsOptions = {
+      root: null, // root(viewport) -- is the element that the target is intersecting (null is an alternative) --then will be able to observe the target element intersecting the entire viewport
+      threshold: [0, 0.2], // threshold (visible in root VP)-- the percentage of intersection at which the observer callback will be called (obsCallback)
+    };
+
+    const observer = new IntersectionObserver(obsCallback, obsOptions);
+    observer.observe(section1); // target -- element that will be intersecting
+
+    // what actually is the intersection observer API, and why is it so helpful? Well, this API allows our code to basically observe changes to the way that a certain target element intersects another element, or the way it intersects the viewport.
+  ```
+
+- Revealing elements on Scroll
+
+  ```js
+  // Revealing Section as scrolling
+  const allSection = document.querySelectorAll(".section");
+
+  const revealSection = function (entries, observer) {
+    const [entry] = entries;
+    console.log(entry);
+
+    if (!entry.isIntersecting) return;
+
+    entry.target.classList.remove("section--hidden");
+    observer.unobserve(entry.target);
+  };
+  const sectionObserver = new IntersectionObserver(revealSection, {
+    root: null,
+    threshold: 0.15,
+  });
+  allSection.forEach(function (section) {
+    sectionObserver.observe(section);
+    section.classList.add("section--hidden");
+  });
+  ```
+
+- Lazy Loading Image
+
+  ```js
+  // Lazy Loading Image -- really great for performance
+  const imgTarget = document.querySelectorAll("img[data-src]"); // use to select img data-src attributes
+
+  const loadImg = function (entries, observer) {
+    const [entry] = entries;
+    console.log(entry);
+
+    if (!entry.isIntersecting) return;
+
+    // Replace src with data-src
+    entry.target.src = entry.target.dataset.src;
+
+    entry.target.addEventListener("load", function () {
+      entry.target.classList.remove("lazy-img");
+
+      observer.unobserve(entry.target);
+    });
+  };
+
+  const imgObesver = new IntersectionObserver(loadImg, {
+    root: null,
+    threshold: 0,
+    rootMargin: "200px",
+  });
+
+  imgTarget.forEach((img) => imgObesver.observe(img));
+  ```
+
 ## Section 14: OOP with JS
 
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
