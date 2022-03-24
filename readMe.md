@@ -5289,6 +5289,8 @@ javascriptIsFun = "YES!";
   imgTarget.forEach((img) => imgObesver.observe(img));
   ```
 
+- Building Slider Component
+
 ## Section 14: OOP with JS
 
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
