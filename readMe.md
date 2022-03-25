@@ -5291,6 +5291,141 @@ javascriptIsFun = "YES!";
 
 - Building Slider Component
 
+  ```js
+  // Building Slider Component
+  const slider = function () {
+    // Selector
+    const slides = document.querySelectorAll(".slide");
+    const btnLeft = document.querySelector(".slider__btn--left");
+    const btnRight = document.querySelector(".slider__btn--right");
+    const dotsContainer = document.querySelector(".dots");
+
+    let curSlide = 0;
+    const maxSlide = slides.length;
+
+    // visual sample for translateX
+    // const slider = document.querySelector('.slider');
+    // slider.style.transform = 'scale(0.4) translateX(-800px)';
+    // slider.style.overflow = 'visible';
+
+    // slides.forEach((s, i) => (s.style.transform = `translateX(${100 * i}%`));
+    // // 0%, 100%, 200%, 300%
+
+    // Function
+    const goToSlide = function (slide) {
+      slides.forEach(
+        (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+      );
+      // cur slide = 1 : -100%, 0%, 100%, 200%
+      // i(0) - curSlide(1) = -1
+      // 1 - 1 = 0
+      // 2 - 1 = 1
+      // 3 - 1 = 2
+    };
+
+    // when page reload slide will be on its initial 0 (translateX)
+
+    const creatDots = function () {
+      slides.forEach(function (_, i) {
+        dotsContainer.insertAdjacentHTML(
+          "beforeend",
+          `<button class="dots__dot" data-slide="${i}"></button>`
+        );
+      });
+    };
+
+    const activeDot = function (slide) {
+      document
+        .querySelectorAll(".dots__dot")
+        .forEach((dot) => dot.classList.remove("dots__dot--active"));
+
+      document
+        .querySelector(`.dots__dot[data-slide="${slide}"]`) // can create selector using brackets notation for certain attributes
+        .classList.add("dots__dot--active");
+    };
+
+    // Next slide function
+    const nextSlide = function () {
+      if (curSlide === maxSlide - 1) {
+        curSlide = 0;
+      } else {
+        curSlide++;
+      }
+
+      goToSlide(curSlide);
+      activeDot(curSlide);
+    };
+
+    const prevSlide = function () {
+      if (curSlide === 0) {
+        curSlide = maxSlide - 1;
+      } else {
+        curSlide--;
+      }
+
+      goToSlide(curSlide);
+      activeDot(curSlide);
+    };
+
+    const init = function () {
+      goToSlide(0);
+      creatDots();
+      activeDot(0);
+    };
+    init();
+
+    // Event Handlers
+    btnRight.addEventListener("click", nextSlide);
+    btnLeft.addEventListener("click", prevSlide);
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") prevSlide();
+      e.key === "ArrowRight" && nextSlide();
+    });
+
+    dotsContainer.addEventListener("click", function (e) {
+      if (e.target.classList.contains("dots__dot")) {
+        const { slide } = e.target.dataset;
+        goToSlide(slide);
+        activeDot(slide);
+      }
+    });
+  };
+
+  slider();
+  ```
+
+- Lifecylec of DOM Events
+
+  ```js
+  //Lifecycle DOM Events
+  document.addEventListener("DOMContentLoaded", function (e) {
+    console.log("HTML parsed and DOM Tree built", e);
+  }); // DOMContentLoaded --this event fired as soon as the HTML file loaded
+
+  window.addEventListener("load", function (e) {
+    console.log("Page fully loaded", e);
+  });
+  //  load event is fired by the window. As soon as not only the HTML is parsed, but also all the images and external resources like CSS files are also loaded. --complete page has finishes loading
+
+  // window.addEventListener('beforeunload', function (e) {
+  //   e.preventDefault();
+  //   console.log(e);
+  //   e.returnValue = '';
+  // }); // beforeunload --this event is created immediately before a user is about to leave a page
+  ```
+
+- Efficient Script Loading: defer and async
+
+  ![](./img/scriptLoading.png)
+  ![](./img/scriptLoading1.png)
+
+  - Conclusion: using the HTML head is overall the best solution. For example --if your script relies on some third party library that you need to include, you will include that library before your own script, so that your script can then use the library's code. And in this case, you have to use defer and not async. Because defer will guarantee the correct order of execution
+  - for third party scripts, where the order does not matter, for example, an analytics software like Google Analytics, or an ad script, or something like that, then in this case, you should totally use async. So for any code that your own code will not need to interact with async is just fine. So it's a good use case for this kind of scripts.
+  - NOTE: only modern browsers support async and defer. If you need to support all browsers, then you need to put script tag at the end
+
+-
+
 ## Section 14: OOP with JS
 
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries

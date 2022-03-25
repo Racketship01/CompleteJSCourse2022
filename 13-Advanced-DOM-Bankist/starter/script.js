@@ -250,7 +250,7 @@ imgTarget.forEach(img => imgObesver.observe(img));
 
 ///////////////////////////////////////////////////////////
 
-// Building Slider Component - Part 1
+// Building Slider Component
 const slider = function () {
   // Selector
   const slides = document.querySelectorAll('.slide');
@@ -352,6 +352,25 @@ const slider = function () {
 
 slider();
 ////////////////////////////////////////////////////////////
+//Lifecycle DOM Events
+document.addEventListener('DOMContentLoaded', function (e) {
+  console.log('HTML parsed and DOM Tree built', e);
+}); // DOMContentLoaded --this event fired as soon as the HTML file loaded
+
+window.addEventListener('load', function (e) {
+  console.log('Page fully loaded', e);
+});
+//  load event is fired by the window. As soon as not only the HTML is parsed, but also all the images and external resources like CSS files are also loaded. --complete page has finishes loading
+
+// window.addEventListener('beforeunload', function (e) {
+//   e.preventDefault();
+//   console.log(e);
+//   e.returnValue = '';
+// }); // beforeunload --this event is created immediately before a user is about to leave a page
+///////////////////////////////////////////////////////////
+
+// Efficient Script Loading: defer and async
+
 ////////////////////////////////////////////////////////////
 // console.log(document.open());
 /*
