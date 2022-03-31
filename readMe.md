@@ -5424,9 +5424,352 @@ javascriptIsFun = "YES!";
   - for third party scripts, where the order does not matter, for example, an analytics software like Google Analytics, or an ad script, or something like that, then in this case, you should totally use async. So for any code that your own code will not need to interact with async is just fine. So it's a good use case for this kind of scripts.
   - NOTE: only modern browsers support async and defer. If you need to support all browsers, then you need to put script tag at the end
 
--
-
 ## Section 14: OOP with JS
+
+- What is Object Oriented Programming?
+
+  ![](./img/OOP.png)
+
+  - Class itself is not an object **CLASS is blueprint analogy while INSTANCE is like a real house**
+
+  ![](./img/OOP-1.png)
+
+  - Abstraction
+    ![](./img/OOP-2.png)
+
+  - Encapsulation
+    ![](./img/OOP-3.png)
+
+    - State\*\* simply refers to an object data
+    - \*\*allowing external code to manipulate internal state directly can cause many kinds of bugs esp in large code bases and dev teams
+    - **public interface** -- all the methods that are not private, that are not encapsulated
+    - making methods private easier to change the code without breaking code from the outside
+    - \*\*in summary, we should always have the goal to nicely encapsulate most of our state and methods and only leaving essential methods public
+
+  - Inheritance
+    ![](./img/OOP-4.png)
+
+  - Polymorphism
+    ![](./img/OOP-5.png)
+
+- OOP in JS
+  ![](./img/OOP-6.png)
+
+  - "Classical OOP": CLASSES
+
+    - Class --is like a blueprint which is theoretical plan and that we use to build many houses in real world
+    - Theoretical class can be used to create actual objects called **instance**, the process in creating an instance is called instantiation.
+
+  - OOP in JS: PROTOTYPES
+    - How does OOP actually work in JS?
+      - In JS, prototypes and all objects in JS are linked to certain prototype object (each object has prototype)
+      - the prototype object contains methods and properties that all the objects that are linked to that prototype can access and use. And this behavior is usually called **prototypal inheritance**--also called delegation --object delegate their behavior to the prototype. While in classical OOP, methods are copied from class to the object
+      - **behavior: another term for methods**
+      - **object delegate/inherit their behavior to the prototypes**
+      - NOTE: difference between prototypal inheritance -- instance(object) inhereting from class. While inheritance in principles of OOP(tradional) -- one class inhereting from another class
+      - NOTE: functions are also object
+
+  ![](./img/OOP-7.png)
+
+- Constructor Functions and the "new" Operator
+
+  - Constructor functions always start with a capital letter
+  - Arrow function will actually not work as a function constructor because it doesnt have its own this keyword. Only function expression and declaration will work
+  - The difference between a regular function and constructor function is that we call the constructor using the "new" keyword
+  - JS doesnt really have classes in traditional OOP --however constructor functions used to simulates classes
+
+  -- NOTE: constructor functions are not really a feature of the JS language but rather simply a pattern that has been developed by other developers
+
+  ```js
+  const Person = function (firstName, birthYear) {
+    // instance properties
+    this.firstName = firstName;
+    this.birthYear = birthYear;
+
+    // never create method inside constructor function --terrible to the performance of code for thousands of Person object --solutiion? use prototypes and prototype inheritance
+    //   this.calcAge = function () {
+    //     console.log(2037 - this.birthYear);
+    //   };
+  }; // simulated class --blueprint
+  const jonas = new Person("Jonas", 1991); // instance --actual with actual data
+  console.log(jonas);
+  console.log(jonas instanceof Person); // True -- operator to test instance
+
+  // 1. New {empty} is created
+  // 2. function is called, this keyword pointed to the new {}
+  // 3. {} linked to prototype
+  // 4. function automatically return {} --no longer to be empty
+
+  const matilda = new Person("Matilda", 2017);
+  const jack = new Person("Jack", 1975);
+  console.log(matilda, jack);
+  ```
+
+- Prototypes
+
+  - each and every function in JS automatically has a property called prototype --includes constructor function
+
+  - each object created by constructor function will get access to all the methods and properties that we define on the constructors prototype property
+
+  ```js
+  // Prototypes
+  console.log(Person.prototype); // any object has access to the method and properties from its prototype
+
+  // set method to prototype
+  Person.prototype.calcAge = function () {
+    console.log(2037 - this.birthYear);
+  }; // this keyword set to the object(created by constructor function) that is calling the method
+  jonas.calcAge(); // jonas object is connected to Person,prototype --prototypal inheritance
+  matilda.calcAge();
+  jack.calcAge();
+
+  console.log(jonas.prototype); // undefined
+  console.log(jonas.__proto__); // Step 3 --jonas variable --creates and link this proto property and it sets its value to the prototype property of the function (Person.prototype.calcAge()) that is being called.
+
+  console.log(jonas.__proto__ === Person.prototype); // True --  jonas object is essentially the prototype property of the constructor function
+  // jonas prototype is the prototype property of the Person constructor function.
+
+  console.log(Person.prototype.isPrototypeOf(jonas)); // True
+  console.log(Person.prototype.isPrototypeOf(Person)); // False
+  console.log(jonas.__proto__.isPrototypeOf(jonas)); // True
+  console.log(jonas.__proto__.isPrototypeOf(Person)); // False
+
+  // NOTE: Person.prototype here is actually not the prototype of Person(variable--object). But instead, it is what's gonna be used as the prototype of all the objects that are created with the Person constructor function.
+
+  // can also set properties to prototype
+  Person.prototype.species = "Homo Sapiens";
+  console.log(jonas.species, matilda.species);
+
+  console.log(jonas.hasOwnProperty("firstName")); // true
+  console.log(jonas.hasOwnProperty("species")); // false
+
+  // NOTE: this property is not really directly in the object, so it's not its own property own properties are only the ones that are declared directly on the object itself. Not including the inherited properties
+  ```
+
+- Prototypal Inheritance and Prototype Chain
+
+  ![](./img/prototype.png)
+
+  - this constructor function has a prototype property which is an object and inside that object, we defined the calcAge method and Person.prototype itself actually also has a reference back to person which is the constructor property. So, essentially Person.prototyp.constructor is gonna point back to person itself.
+
+  - if a property or a method cannot be found in a certain object JS will look into its prototype
+
+  - ability of looking up methods and properties is called **Prototype Chain**
+
+  - object constructor function and this is actually the function that is called behind the scenes whenever we create an object literal. So just an object simply with curly braces. So essentially the curly braces are just like a shortcut to writing new object
+
+  ![](./img/prototype1.png)
+
+  - prototype chain is similar to scope chain -- certain object gonna look up into the next prototype chain and see if it can find it there --works in properties and method
+
+- Prototypal Inheritance on Built-In Object
+
+  ```js
+  // Prototypal Inheritance on Built-In Objects
+
+  console.log(jonas.__proto__); // constructor: Person.prototype
+  console.log(jonas.__proto__.__proto__); // constructor: Object.prototype (top of prototype chain)
+  console.log(jonas.__proto__.__proto__.__proto__); // constructor: null
+
+  console.dir(Person.prototype.constructor); // constructor property points back at Person()
+
+  const arr = [3, 5, 9, 4, 5, 8, 5]; // Array Prototype
+  console.log(arr.__proto__); // all arrays get access to all method as arrays are object. Each array does not contain all of these methods but instead it will inherit those method
+
+  // same as creating new Array === []
+
+  console.log(arr.__proto__ === Array.prototype); // True
+
+  console.log(arr.__proto__.__proto__); // object constructor
+  console.log(arr.__proto__.__proto__.__proto__); // null
+  // console.dir(arr.__proto__.__proto__.__proto__);
+
+  // NOTE: the prototype property of the constructor (function) is gonna be the prototype of all the objects created by that constructor.
+
+  Array.prototype.unique = function () {
+    return [...new Set(this)];
+  };
+  console.log(arr.unique());
+
+  // TIP: extending the prototype of a built-in object is not a good idea if working in large project
+
+  const h1 = document.querySelector("h1");
+  console.dir((x) => x + 1);
+  ```
+
+- ES6 Classes
+
+  > Classes on JS do not work like traditional classes in other languages like Java or C++
+
+  > Classes are special type of functions thats why we have classes declaration and class expression
+
+  ```js
+  // ES6 Classes
+
+  // class expression
+  //const PersonCl = class {};
+
+  // class declaration
+  class PersonCl {
+    // similar way as constructor function --method of class called constructor
+    constructor(firstName, birthYear) {
+      this.firstName = firstName;
+      this.birthYear = birthYear;
+    }
+
+    // Methods will be added to .prototype propert of the classes
+    calcAge() {
+      console.log(2037 - this.birthYear);
+    } // -- will automatically be added to the prototype property of the class
+
+    greet() {
+      console.log(`Hi! I am ${this.firstName}`);
+    }
+  }
+  // to create new object, also uses "new" operator and constructor will automatically be called
+  const jonas = new PersonCl("Jonas", 1991);
+  console.log(jonas);
+  console.log(jonas.__proto__);
+  jonas.calcAge();
+
+  console.log(jonas.__proto__ === PersonCl.prototype); // True --same with constructor function but the only difference is we can write the method inside the class
+
+  // adding method
+  // PersonCl.prototype.greet = function () {
+  //   console.log(`Hi! I am ${this.firstName}`);
+  // };
+  jonas.greet();
+
+  // NOTE:
+  // 1. Classes are not hoisted --means we cannot use them before they are declared in the code
+  // 2. Classes are first class citizen --means we can pass them into functions and also return them a function
+  // 3. Classes are executed in strict mode
+  ```
+
+- Setters and Getters
+
+  - call these special properties assessor properties, while the more normal properties are called data properties.
+
+  - getters and setters are basically functions that get and set a value and looks as if it is a property in object
+
+  ```js
+  // Setters and Getters
+  const account = {
+    owner: "Jonas",
+    movements: [200, 530, 120, 300],
+
+    get latest() {
+      return this.movements.slice(-1).pop();
+    },
+
+    set latest(mov) {
+      this.movements.push(mov);
+    },
+  };
+  console.log(account.latest);
+
+  account.latest = 50;
+  console.log(account.movements);
+
+  //////////////////////////////////////
+  class PersonCl {
+    // similar way as constructor function --method of class called constructor
+    constructor(fullName, birthYear) {
+      this.fullName = fullName;
+      this.birthYear = birthYear;
+    }
+
+    // Methods will be added to .prototype propert of the classes
+    calcAge() {
+      console.log(2037 - this.birthYear);
+    } // -- will automatically be added to the prototype property of the class
+
+    greet() {
+      console.log(`Hi! I am ${this._fullName}`);
+    }
+
+    get age() {
+      return 2037 - this.birthYear;
+    }
+
+    // set a property that already exist
+    set fullName(name) {
+      if (name.includes(" ")) this._fullName = name;
+      else alert(`${name} is not a fullname`);
+    }
+
+    get fullName() {
+      return this._fullName;
+    }
+  }
+  ```
+
+- Static Method
+
+  - Array.from()
+    - basically just a simple function, but its a function that's attached to the Array constructor.
+    - convert any array like structure to a real Array
+    - method that is attached to the Array Constructor and not to the prototype property of the constructor
+    - all array do not inherit this method --because its not on their prototype. Its simply attached to the constructor itself.
+    - sometimes they are still useful to implement some kind of helper function about a class or about a constructor function.
+
+  ```js
+  // Static Method
+
+  const Person = function (firstName, birthYear) {
+    this.firstName = firstName;
+    this.birthYear = birthYear;
+  };
+  const jonas1 = new Person("Jonas", 1991);
+
+  // add static method
+  Person.hey = function () {
+    console.log("Hey there!");
+    console.log(this); // Person object --whatever object is calling the method, will be the this key word inside of that function. And so here the this key word, is simply that entire constructor function.
+  };
+  Person.hey();
+  // jonas1.hey(); // Reference Error --not in the prototype of jonas1
+
+  ///////////////////////////////////////////////
+  class PersonCl {
+    // similar way as constructor function --method of class called constructor
+    constructor(fullName, birthYear) {
+      this.fullName = fullName;
+      this.birthYear = birthYear;
+    }
+
+    // INSTANCE METHOD
+    // Methods will be added to .prototype propert of the classes
+    calcAge() {
+      console.log(2037 - this.birthYear);
+    } // -- will automatically be added to the prototype property of the class
+
+    greet() {
+      console.log(`Hi! I am ${this._fullName}`);
+    }
+
+    get age() {
+      return 2037 - this.birthYear;
+    }
+
+    // set a property that already exist
+    set fullName(name) {
+      if (name.includes(" ")) this._fullName = name;
+      else alert(`${name} is not a fullname`);
+    }
+
+    get fullName() {
+      return this._fullName;
+    }
+
+    // STATIC METHOD
+    static hey() {
+      console.log("Hey there!");
+      console.log(this);
+    }
+  }
+  PersonCl.hey();
+  ```
 
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
 

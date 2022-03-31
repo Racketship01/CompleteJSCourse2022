@@ -369,8 +369,6 @@ window.addEventListener('load', function (e) {
 // }); // beforeunload --this event is created immediately before a user is about to leave a page
 ///////////////////////////////////////////////////////////
 
-// Efficient Script Loading: defer and async
-
 ////////////////////////////////////////////////////////////
 // console.log(document.open());
 /*
