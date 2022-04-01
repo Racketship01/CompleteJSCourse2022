@@ -5771,6 +5771,110 @@ javascriptIsFun = "YES!";
   PersonCl.hey();
   ```
 
+- Object.create
+
+  - works differently than constructor functions and classes
+  - still have prototypal inheritance, however, there are **no prototype properties** involved. And also **no constructor functions**, and **no new operator**.
+  - So instead, we can use Object.create() to essentially **manually set the prototype** of an object, to any other object that we want.
+
+  ![](./img/objectCreate.png)
+
+  - NOTE: Object.create -- looking at properties, or methods in a prototype chain, works just like it worked in function constructors, or classes. And so the prototype chain, in fact, looks exactly the same here. The big difference is that we didn't need any constructor function, and also no prototype property at all,
+
+  ```js
+  // Object.create
+
+  const PersonProto = {
+    calcAge() {
+      console.log(2037 - this.birthYear);
+    },
+
+    init(firstName, birthYear) {
+      this.firstName = firstName;
+      this.birthYear = birthYear;
+    }, // not a prototype property --just manual way of initializing the object
+  };
+  console.log(PersonProto.__proto__); // all objects has a prototype
+
+  const steven = Object.create(PersonProto); // manually set the prototype of an object, to any other object (PersonProto)
+  console.log(steven);
+  steven.name = "Steven";
+  steven.birthYear = 2002;
+  steven.calcAge();
+
+  console.log(steven.__proto__); // PersonProto
+  console.log(steven.__proto__ === PersonProto); // True
+  console.log(steven.__proto__ === PersonProto.prototype); // false --no new operator used thats why no prototype property created
+  console.log(PersonProto.hasOwnProperty("birthYear")); // false
+
+  const sarah = Object.create(PersonProto);
+  sarah.init("Sarah", 1979);
+  sarah.calcAge();
+
+  // NOTE:  Object.create creates a new object, and the prototype of that object will be the object that we passed in.
+  ```
+
+- Inheritance between Classes: Constructor Functions
+
+  ![](./img/inheritClasses.png)
+
+  ![](./img/inheritClasses1.png)
+
+  - what we want to do is to make person dot prototype, the prototype of student dot prototype.
+  - we are gonna have to create this connection manually. And to do this, to link two prototype objects, we are gonna use Object.create() because defining prototypes manually is exactly what Object.create does.
+
+  ![](./img/inheritClasses2.png)
+
+  ![](./img/inheritClasse3.png)
+
+  ```js
+  // Inheritance between Classes: Constructor Function
+  const Person = function (firstName, birthYear) {
+    this.firstName = firstName;
+    this.birthYear = birthYear;
+  };
+
+  Person.prototype.calcAge = function () {
+    console.log(2037 - this.birthYear);
+  };
+
+  const Student = function (firstName, birthYear, course) {
+    // this.firstName = firstName;
+    // this.birthYear = birthYear;
+    Person.call(this, firstName, birthYear); // we used call method to call person function pointing the this keyword in Student object --regular function calling this keyword is undefined
+    this.course = course;
+  };
+
+  // Linking prototypes
+  Student.prototype = Object.create(Person.prototype);
+
+  Student.prototype.introduce = function () {
+    console.log(`Hi! my name is ${this.firstName} and I study ${this.course}`);
+  };
+
+  const mike = new Student("Mike", 1997, "Computer Studies");
+  mike.introduce();
+  mike.calcAge();
+
+  // the link between instance and prototype has been made automatically by creating new object with the **new operator**
+
+  console.log(mike.__proto__); // person.prototype
+  console.log(mike.__proto__.__proto__); // object.prototype
+
+  console.log(mike instanceof Object); // True
+  console.log(mike instanceof Student); // True
+  console.log(mike instanceof Person); // True --both true as we links two prototypes
+
+  Student.prototype.constructor = Student; // pointing back to student.prototype
+  console.dir(Student.prototype.constructor); //points to Person prototype as --reason for that is that we set the prototype property of the student using object.create. And so this makes it so that the constructor of student.prototype is still person.
+
+  // child class can overwrite a method that inherited from the parent class
+
+  // NOTE: when there are two methods or properties with the same name in a prototype chain, the first one that appears in the chain is the one that's gonna be used
+  ```
+
+- Inheritance Between Class: ES6 Classes
+
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
 
 ## Section 16: Asynchronous JS: Promises, Async/Awaits and AJAX

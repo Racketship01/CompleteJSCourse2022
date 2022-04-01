@@ -40,7 +40,7 @@ console.log(jonas.prototype); // undefined
 console.log(jonas.__proto__); // Step 3 --jonas variable --creates and link this proto property and it sets its value to the prototype property of the function (Person.prototype.calcAge()) that is being called.
 
 console.log(jonas.__proto__ === Person.prototype); // True --  jonas object is essentially the prototype property of the constructor function
-// jonas prototype is the prototype property of the Person constructor function.
+// jonas prototype is the prototype property of the Person constructor function.  
 
 console.log(Person.prototype.isPrototypeOf(jonas)); // True
 console.log(Person.prototype.isPrototypeOf(Person)); // False
@@ -56,7 +56,7 @@ console.log(jonas.species, matilda.species);
 console.log(jonas.hasOwnProperty('firstName')); // true
 console.log(jonas.hasOwnProperty('species')); // false
 
-// NOTE: this property is not really directly in the object, so it's not its own property own properties are only the ones that are declared directly on the object itself. Not including the inherited properties
+// NOTE: this property (hasOwnProperty) is not really directly in the object, so it's not its own property own properties are only the ones that are declared directly on the object itself. Not including the inherited properties
 
 // Prototypal Inheritance on Built-In Objects
 
@@ -212,7 +212,7 @@ account.latest = 50;
 console.log(account.movements);
 
 ////////////////////////////////////////////////////////////////
-
+/*
 // Static Method
 
 const Person = function (firstName, birthYear) {
@@ -228,3 +228,168 @@ Person.hey = function () {
 };
 Person.hey();
 // jonas1.hey(); // Reference Error --not in the prototype of jonas1
+*/
+///////////////////////////////////////////////////////////
+
+// Object.create
+
+const PersonProto = {
+  calcAge() {
+    console.log(2037 - this.birthYear);
+  },
+
+  init(firstName, birthYear) {
+    this.firstName = firstName;
+    this.birthYear = birthYear;
+  }, // not a prototype property --just manual way of initializing the object
+};
+console.log(PersonProto.__proto__); // all objects has a prototype
+
+const steven = Object.create(PersonProto); // manually set the prototype of an object, to any other object (PersonProto)
+console.log(steven);
+steven.name = 'Steven';
+steven.birthYear = 2002;
+steven.calcAge();
+
+console.log(steven.__proto__); // PersonProto
+console.log(steven.__proto__ === PersonProto); // True
+console.log(steven.__proto__ === PersonProto.prototype); // false --no new operator used thats why no prototype property created
+console.log(PersonProto.hasOwnProperty('birthYear')); // false
+
+const sarah = Object.create(PersonProto);
+sarah.init('Sarah', 1979);
+sarah.calcAge();
+
+// NOTE:  Object.create creates a new object, and the prototype of that object will be the object that we passed in.
+
+//////////////////////////////////////////////////////////////
+/*
+// Challenge 02
+
+// 1.
+class CarCl {
+  constructor(made, speed) {
+    this.made = made;
+    this.speed = speed;
+  }
+
+  accelerate() {
+    this.speed += 10;
+    console.log(`${this.made} is going at ${this.speed}km/h`);
+  }
+
+  brake() {
+    this.speed -= 5;
+    console.log(`${this.made} is decreasing speed at ${this.speed}km/h`);
+  }
+
+  // 2.
+  get speedUS() {
+    return this.speed / 1.6;
+  }
+
+  // 3.
+  set speedUS(speed) {
+    this.speed = speed * 1.6;
+  }
+}
+// 4.
+const ford = new CarCl('Ford', 120);
+console.log(ford); // 120
+console.log(ford.speedUS);
+ford.accelerate();
+ford.accelerate();
+ford.brake();
+
+ford.speedUS = 50;
+console.log(ford); // 80
+*/
+//////////////////////////////////////////////////////////////
+
+// Inheritance between Classes: Constructor Function
+const Person = function (firstName, birthYear) {
+  this.firstName = firstName;
+  this.birthYear = birthYear;
+};
+
+Person.prototype.calcAge = function () {
+  console.log(2037 - this.birthYear);
+};
+
+const Student = function (firstName, birthYear, course) {
+  // this.firstName = firstName;
+  // this.birthYear = birthYear;
+  Person.call(this, firstName, birthYear); // we used call method to call person function pointing the this keyword in Student object --regular function calling this keyword is undefined
+  this.course = course;
+};
+
+// Linking prototypes
+Student.prototype = Object.create(Person.prototype);
+
+Student.prototype.introduce = function () {
+  console.log(`Hi! my name is ${this.firstName} and I study ${this.course}`);
+};
+
+const mike = new Student('Mike', 1997, 'Computer Studies');
+mike.introduce();
+mike.calcAge();
+
+// the link between instance and prototype has been made automatically by creating new object with the **new operator**
+
+console.log(mike.__proto__); // person.prototype
+console.log(mike.__proto__.__proto__); // object.prototype
+
+console.log(mike instanceof Object); // True
+console.log(mike instanceof Student); // True
+console.log(mike instanceof Person); // True --both true as we links two prototypes
+
+Student.prototype.constructor = Student; // pointing back to student.prototype
+console.dir(Student.prototype.constructor); //points to Person prototype as --reason for that is that we set the prototype property of the student using object.create. And so this makes it so that the constructor of student.prototype is still person.
+
+///////////////////////////////////////////////////////////////
+
+// Challenge 03
+const Car = function (made, speed) {
+  this.made = made;
+  this.speed = speed;
+};
+
+Car.prototype.accelerate = function () {
+  this.speed += 10;
+  console.log(`${this.made} is going at ${this.speed}km/h`);
+};
+
+Car.prototype.brake = function () {
+  this.speed -= 5;
+  console.log(`${this.made} is decreasing speed at ${this.speed}km/h`);
+};
+
+const EV = function (made, speed, charge) {
+  Car.call(this, made, speed);
+  this.charge = charge;
+};
+
+EV.prototype = Object.create(Car.prototype);
+
+EV.prototype.chargeBattery = function (chargeTo) {
+  this.charge = chargeTo;
+};
+
+EV.prototype.accelerate = function () {
+  this.speed += 20;
+  this.charge--;
+  console.log(
+    `${this.made} going ${this.speed}km/h, with a charge of ${this.charge}%`
+  );
+};
+
+const tesla = new EV('Tesla', 120, 23);
+tesla.chargeBattery(90);
+console.log(tesla);
+tesla.accelerate();
+tesla.accelerate();
+tesla.brake();
+
+// child class can overwrite a method that inherited from the parent class
+
+// NOTE: when there are two methods or properties with the same name in a prototype chain, the first one that appears in the chain is the one that's gonna be used
