@@ -126,7 +126,7 @@ mercedes.cars();
 ///////////////////////////////////////////////////////////////
 
 // ES6 Classes
-
+/*
 // class expression
 //const PersonCl = class {};
 
@@ -190,9 +190,9 @@ const walter = new PersonCl('Walter White', 1965);
 // 1. Classes are not hoisted --means we cannot use them before they are declared in the code
 // 2. Classes are first class citizen --means we can pass them into functions and also return them a function
 // 3. Classes are executed in strict mode
-
+*/
 ///////////////////////////////////////////////////////////////
-
+/*
 // Setters and Getters
 const account = {
   owner: 'Jonas',
@@ -210,7 +210,7 @@ console.log(account.latest);
 
 account.latest = 50;
 console.log(account.movements);
-
+*/
 ////////////////////////////////////////////////////////////////
 /*
 // Static Method
@@ -230,7 +230,7 @@ Person.hey();
 // jonas1.hey(); // Reference Error --not in the prototype of jonas1
 */
 ///////////////////////////////////////////////////////////
-
+/*
 // Object.create
 
 const PersonProto = {
@@ -261,7 +261,7 @@ sarah.init('Sarah', 1979);
 sarah.calcAge();
 
 // NOTE:  Object.create creates a new object, and the prototype of that object will be the object that we passed in.
-
+*/
 //////////////////////////////////////////////////////////////
 /*
 // Challenge 02
@@ -305,7 +305,7 @@ ford.speedUS = 50;
 console.log(ford); // 80
 */
 //////////////////////////////////////////////////////////////
-
+/*
 // Inheritance between Classes: Constructor Function
 const Person = function (firstName, birthYear) {
   this.firstName = firstName;
@@ -345,9 +345,9 @@ console.log(mike instanceof Person); // True --both true as we links two prototy
 
 Student.prototype.constructor = Student; // pointing back to student.prototype
 console.dir(Student.prototype.constructor); //points to Person prototype as --reason for that is that we set the prototype property of the student using object.create. And so this makes it so that the constructor of student.prototype is still person.
-
+*/
 ///////////////////////////////////////////////////////////////
-
+/*
 // Challenge 03
 const Car = function (made, speed) {
   this.made = made;
@@ -393,3 +393,267 @@ tesla.brake();
 // child class can overwrite a method that inherited from the parent class
 
 // NOTE: when there are two methods or properties with the same name in a prototype chain, the first one that appears in the chain is the one that's gonna be used
+*/
+////////////////////////////////////////////////////
+/*
+// Inheritance Between Class: ES6 Classes
+class PersonCl {
+  constructor(fullName, birthYear) {
+    this.fullName = fullName;
+    this.birthYear = birthYear;
+  }
+
+  // INSTANCE METHOD
+  calcAge() {
+    console.log(2037 - this.birthYear);
+  }
+
+  greet() {
+    console.log(`Hi! I am ${this._fullName}`);
+  }
+
+  get age() {
+    return 2037 - this.birthYear;
+  }
+
+  // set a property that already exist
+  set fullName(name) {
+    if (name.includes(' ')) this._fullName = name;
+    else alert(`${name} is not a fullname`);
+  }
+
+  get fullName() {
+    return this._fullName;
+  }
+
+  // STATIC METHOD
+  static hey() {
+    console.log('Hey there!');
+    console.log(this);
+  }
+}
+
+class StudentCl extends PersonCl {
+  constructor(fullName, birthYear, course) {
+    // Always need to happen first -- super is responsible for creating the this keyword in this subclass
+    super(fullName, birthYear); // super() --consructor function of the Parent class --happen automatically no need to use call method
+    this.course = course;
+  } // if dont need any new properties then no need to write a constructor method in the child class
+
+  introduce() {
+    console.log(`Hi! my name is ${this.fullName} and I study ${this.course}`);
+  }
+
+  calcAge() {
+    console.log(
+      `I'm ${
+        2037 - this.birthYear
+      } years old but as a student I feel more like ${
+        2037 - this.birthYear + 10
+      }`
+    );
+  }
+}
+const martha = new StudentCl('Martha Jones', 2012, 'Computer Science');
+martha.introduce();
+martha.calcAge();
+
+// NOTE: class syntax hides a lot of the details that are actually happening behind the scenes, because classes are just a layer of obstruction over construction functions. But not a problem there is inheritance between classes that works behind the scenes
+*/
+/////////////////////////////////////////////////////
+/*
+// Inheritance Between Class: Object.create()
+
+const PersonProto = {
+  calcAge() {
+    console.log(2037 - this.birthYear);
+  },
+
+  init(firstName, birthYear) {
+    this.firstName = firstName;
+    this.birthYear = birthYear;
+  }, // not a prototype property --just manual way of initializing the object
+};
+
+const steven = Object.create(PersonProto);
+
+const StudentProto = Object.create(PersonProto);
+StudentProto.init = function (firstName, birthYear, course) {
+  PersonProto.init.call(this, firstName, birthYear);
+  this.course = course;
+};
+
+StudentProto.introduce = function () {
+  console.log(`Hi! my name is ${this.firstName} and I study ${this.course}`);
+};
+
+const jay = Object.create(StudentProto);
+jay.init('Jay', 2010, 'Computer Science');
+jay.introduce();
+jay.calcAge();
+
+// NOTE: in Object.create() we are doing simply linking object together where some objects then serve as the prototype of the other objects
+*/
+//////////////////////////////////////////////////////
+/*
+// Another Class Example
+class Account {
+  constructor(owner, currency, pin) {
+    this.owner = owner;
+    this.currency = currency;
+    this.pin = pin;
+    this.movements = [];
+    this.locale = navigator.language;
+
+    console.log(`Thanks for opening an account ${this.firstName}`);
+  }
+
+  // API --public interface of Account object
+  deposit(val) {
+    this.movements.push(val);
+  }
+
+  withdraw(val) {
+    this.deposit(-val);
+  }
+
+  approveLoan(val) {
+    return true;
+  } // internal method
+
+  requestLoan(val) {
+    if (this.approveLoan) {
+      this.deposit(val);
+      console.log('Loan is approved');
+    }
+  }
+}
+
+const acc1 = new Account('Jonas', 'EUR', 1111);
+acc1.deposit(250);
+acc1.withdraw(140);
+acc1.requestLoan(1000);
+acc1.approveLoan(1000); // should not even be allowed to access this kind of method --need to encapsulate and data privacy
+console.log(acc1);
+*/
+//////////////////////////////////////////////////////////
+/*
+// Encapsulation: Protected Properties and Method
+class Account {
+  constructor(owner, currency, pin) {
+    this.owner = owner;
+    this.currency = currency;
+    // Protected Property
+    this._pin = pin;
+    this._movements = []; //adding underscore(_) here is not does not make the property private, this is just a convention --we called this protected property
+    this.locale = navigator.language;
+
+    console.log(`Thanks for opening an account ${this.firstName}`);
+  }
+
+  // API --public interface of Account object
+
+  getMovements() {
+    return this._movements; // using public method can still have an access to the movs but cannot override them
+  }
+
+  deposit(val) {
+    this._movements.push(val);
+  }
+
+  withdraw(val) {
+    this.deposit(-val);
+  }
+
+  _approveLoan(val) {
+    return true;
+  } // internal method --should not be part of public API
+
+  requestLoan(val) {
+    if (this._approveLoan) {
+      this.deposit(val);
+      console.log('Loan is approved');
+    }
+  }
+}
+
+const acc1 = new Account('Jonas', 'EUR', 1111);
+acc1.deposit(250);
+acc1.withdraw(140);
+acc1.requestLoan(1000);
+// acc1._approveLoan(1000); // should not even be allowed to access this kind of method --need to encapsulate and data privacy
+console.log(acc1);
+
+// NOTE: Protected property can still be accessible outside but it is for the developer to know not supposed to be touch outside of the class --other solution: implement a public method
+*/
+///////////////////////////////////////////////////////////////
+
+// Encapsulation: Private Class Fields and Method
+
+// NOTE: fields --think as property that will be on the instances (instance fields) --have to be outside of any method
+
+class Account {
+  // 1. Public fields (instances)
+  locale = navigator.language; // add only on the instances but not on the prototype --looks like a variable that dont have const or let prepend --also referenceable by/via the this keyword
+
+  // 2. Private fields (also available on instances not on prototype)
+  #movements = []; // #hashtag is the syntax for private fields --this property also protected
+  #pin; // create the field out of the constructor method then dont set to anything as it will be redefine in the constructor method
+
+  constructor(owner, currency, pin) {
+    this.owner = owner;
+    this.currency = currency;
+    // Protected Property
+    this.#pin = pin;
+
+    // this._movements = []; //adding underscore(_) here is not does not make the property private, this is just a convention --we called this protected property
+    //this.locale = navigator.language;
+
+    console.log(`Thanks for opening an account ${this.owner}`);
+  }
+
+  // Public Method --methods that we are using in this class are public method
+  // API --public interface of Account object
+  getMovements() {
+    return this.#movements; // using public method can still have an access to the movs but cannot override them
+  }
+
+  deposit(val) {
+    this.#movements.push(val);
+  }
+
+  withdraw(val) {
+    this.deposit(-val);
+  }
+
+  requestLoan(val) {
+    if (this._approveLoan) {
+      this.deposit(val);
+      console.log('Loan is approved');
+    }
+  }
+
+  // Static Version
+  static helper() {
+    console.log('helper');
+  }
+
+  // Private methods
+  //#approveLoan(val){} --still not supported in chrome
+  _approveLoan(val) {
+    return true;
+  } // internal method --should not be part of public API
+}
+
+const acc1 = new Account('Jonas', 'EUR', 1111);
+acc1.deposit(250);
+acc1.withdraw(140);
+acc1.requestLoan(1000);
+console.log(acc1);
+
+// console.log(acc1.#movements); // syntax error: property is private and protected
+// console.log(acc1.#pin);
+// console.log(acc1.#approveLoad(1000)); // chrome read this as private fields not private method
+
+// static version
+Account.helper();

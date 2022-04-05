@@ -5611,7 +5611,7 @@ javascriptIsFun = "YES!";
 
   // class declaration
   class PersonCl {
-    // similar way as constructor function --method of class called constructor
+    // similar way as constructor function --constructor also called method in ES6 classes
     constructor(firstName, birthYear) {
       this.firstName = firstName;
       this.birthYear = birthYear;
@@ -5706,6 +5706,8 @@ javascriptIsFun = "YES!";
 
 - Static Method
 
+  - The static keyword defines a static method or property for a class, or a class static initialization block. Neither static methods nor static properties can be called on instances of the class. Instead, they're called on the class itself.
+
   - Array.from()
     - basically just a simple function, but its a function that's attached to the Array constructor.
     - convert any array like structure to a real Array
@@ -5715,6 +5717,8 @@ javascriptIsFun = "YES!";
 
   ```js
   // Static Method
+
+  // Array.from() --this method .from() is a simple function attached to the Array constructor and not to the prototype property of the constructor  --also this method is in the Array name space same as Number.parseFloat()
 
   const Person = function (firstName, birthYear) {
     this.firstName = firstName;
@@ -5769,6 +5773,7 @@ javascriptIsFun = "YES!";
     }
   }
   PersonCl.hey();
+  // NOTE: static methods are not available on the instances and sometimes they are still useful to implement some kind of helper function about a class or about a constructor function.
   ```
 
 - Object.create
@@ -5874,6 +5879,302 @@ javascriptIsFun = "YES!";
   ```
 
 - Inheritance Between Class: ES6 Classes
+
+  ```js
+  // Inheritance Between Class: ES6 Classes
+  class PersonCl {
+    constructor(fullName, birthYear) {
+      this.fullName = fullName;
+      this.birthYear = birthYear;
+    }
+
+    // INSTANCE METHOD
+    calcAge() {
+      console.log(2037 - this.birthYear);
+    }
+
+    greet() {
+      console.log(`Hi! I am ${this._fullName}`);
+    }
+
+    get age() {
+      return 2037 - this.birthYear;
+    }
+
+    // set a property that already exist
+    set fullName(name) {
+      if (name.includes(" ")) this._fullName = name;
+      else alert(`${name} is not a fullname`);
+    }
+
+    get fullName() {
+      return this._fullName;
+    }
+
+    // STATIC METHOD
+    static hey() {
+      console.log("Hey there!");
+      console.log(this);
+    }
+  }
+
+  class StudentCl extends PersonCl {
+    constructor(fullName, birthYear, course) {
+      // Always need to happen first -- super is responsible for creating the this keyword in this subclass
+      super(fullName, birthYear); // super() --consructor function of the Parent class --happen automatically no need to use call method
+      this.course = course;
+    } // if dont need any new properties then no need to write a constructor method in the child class
+
+    introduce() {
+      console.log(`Hi! my name is ${this.fullName} and I study ${this.course}`);
+    }
+
+    calcAge() {
+      console.log(
+        `I'm ${
+          2037 - this.birthYear
+        } years old but as a student I feel more like ${
+          2037 - this.birthYear + 10
+        }`
+      );
+    }
+  }
+  const martha = new StudentCl("Martha Jones", 2012, "Computer Science");
+  martha.introduce();
+  martha.calcAge();
+
+  // NOTE: class syntax hides a lot of the details that are actually happening behind the scenes, because classes are just a layer of obstruction over construction functions. But not a problem there is inheritance between classes that works behind the scenes
+  ```
+
+- Inheritance Between Class: Object.create()
+
+  ![](./img/inheritBetweenObj.png)
+
+  ```js
+  // Inheritance Between Class: Object.create()
+
+  const PersonProto = {
+    calcAge() {
+      console.log(2037 - this.birthYear);
+    },
+
+    init(firstName, birthYear) {
+      this.firstName = firstName;
+      this.birthYear = birthYear;
+    }, // not a prototype property --just manual way of initializing the object
+  };
+
+  const steven = Object.create(PersonProto);
+
+  const StudentProto = Object.create(PersonProto);
+  StudentProto.init = function (firstName, birthYear, course) {
+    PersonProto.init.call(this, firstName, birthYear);
+    this.course = course;
+  };
+
+  StudentProto.introduce = function () {
+    console.log(`Hi! my name is ${this.firstName} and I study ${this.course}`);
+  };
+
+  const jay = Object.create(StudentProto);
+  jay.init("Jay", 2010, "Computer Science");
+  jay.introduce();
+  jay.calcAge();
+
+  // NOTE: in Object.create() we are doing simply linking object together where some objects then serve as the prototype of the other objects
+  ```
+
+- Another Class Example
+
+  ```js
+  // Another Class Example
+  class Account {
+    constructor(owner, currency, pin) {
+      this.owner = owner;
+      this.currency = currency;
+      this.pin = pin;
+      this.movements = [];
+      this.locale = navigator.language;
+
+      console.log(`Thanks for opening an account ${this.firstName}`);
+    }
+
+    // API --public interface of Account object
+    deposit(val) {
+      this.movements.push(val);
+    }
+
+    withdraw(val) {
+      this.deposit(-val);
+    }
+
+    approveLoan(val) {
+      return true;
+    } // internal method
+
+    requestLoan(val) {
+      if (this.approveLoan) {
+        this.deposit(val);
+        console.log("Loan is approved");
+      }
+    }
+  }
+
+  const acc1 = new Account("Jonas", "EUR", 1111);
+  acc1.deposit(250);
+  acc1.withdraw(140);
+  acc1.requestLoan(1000);
+  acc1.approveLoan(1000); // should not even be allowed to access this kind of method --need to encapsulate and data privacy
+  console.log(acc1);
+  ```
+
+- Encapsulation: Protected Properties and Method
+
+  > Encapsulation --means to keep some properties and methods private inside the class so that they are not accessible from outside of the class
+
+  > 2 reasons why need encapsulation --1st: it is to prevent code from outside of a class to accidentally manipulate our data inside the class --2nd: small API consisting only a few public methods then we can change all the other internal methods --external code does not rely on these private methods therefore our code will not break when we do internal changes
+
+  - NOTE: 1st: we are not supposed to manually mess with the public interface property --we should encapsulate it
+  - JS classes actually do not yet support real data privacy and encapsulation --there is a proposal to add truly private class fields and methods to the language, but it's not completely ready yet.
+
+  ```js
+  // Encapsulation: Protected Properties and Method
+  class Account {
+    constructor(owner, currency, pin) {
+      this.owner = owner;
+      this.currency = currency;
+      // Protected Property
+      this._pin = pin;
+      this._movements = []; //adding underscore(_) here is not does not make the property private, this is just a convention --we called this protected property
+      this.locale = navigator.language;
+
+      console.log(`Thanks for opening an account ${this.firstName}`);
+    }
+
+    // API --public interface of Account object
+
+    getMovements() {
+      return this._movements; // using public method can still have an access to the movs but cannot override them
+    }
+
+    deposit(val) {
+      this._movements.push(val);
+    }
+
+    withdraw(val) {
+      this.deposit(-val);
+    }
+
+    _approveLoan(val) {
+      return true;
+    } // internal method --should not be part of public API
+
+    requestLoan(val) {
+      if (this._approveLoan) {
+        this.deposit(val);
+        console.log("Loan is approved");
+      }
+    }
+  }
+
+  const acc1 = new Account("Jonas", "EUR", 1111);
+  acc1.deposit(250);
+  acc1.withdraw(140);
+  acc1.requestLoan(1000);
+  // acc1._approveLoan(1000); // should not even be allowed to access this kind of method --need to encapsulate and data privacy
+  console.log(acc1);
+
+  // NOTE: Protected property can still be accessible outside but it is for the developer to know not supposed to be touch outside of the class --other solution: implement a public method
+  ```
+
+- Encapsulation: Private Class Fields and Method
+
+  - Private class fields and methods are actually part of a bigger proposal for improving and changing JavaScript classes which is simply called Class fields. Now this Class fields proposal is currently at stage three. And so right now it's actually not yet part of the JavaScript language.
+  - In tradional OOP languages like Java and C++, properties are usually called fields --with this new proposal, JavaScript is moving away from the idea that classes are just syntactic sugar over constructor functions. Because with this new class features classes actually start to have abilities that we didn't previously have with constructor functions.
+  - In the propasal there are 4 different kinds of fields and method (actually 8) but will focus on 4 in this lecture
+
+    - 1. Public Fields
+      - --properties that are gonna be set on all the objects(instance) that we creating through the class (they are not on the prototype) --properties that do not pass as arguments in the constructor
+    - 2. Private Fields
+      - properties are trully not accessible from the outside
+    - 3. Public Methods
+      - methods that are been using within the class
+    - 4. Private Methods
+      - useful to hide the implementation details from the outside of the class
+      - #hashtag syntax same with private fields
+    - There is also static version --attached on the class itself not on the instance
+
+    ```js
+    // Encapsulation: Private Class Fields and Method
+
+    // NOTE: fields --think as property that will be on the instances (instance fields) --have to be outside of any method
+
+    class Account {
+      // 1. Public fields (instances)
+      locale = navigator.language; // add only on the instances but not on the prototype --looks like a variable that dont have const or let prepend --also referenceable by/via the this keyword
+
+      // 2. Private fields (also available on instances not on prototype)
+      #movements = []; // #hashtag is the syntax for private fields --this property also protected
+      #pin; // create the field out of the constructor method then dont set to anything as it will be redefine in the constructor method
+
+      constructor(owner, currency, pin) {
+        this.owner = owner;
+        this.currency = currency;
+        // Protected Property
+        this.#pin = pin;
+
+        // this._movements = []; //adding underscore(_) here is not does not make the property private, this is just a convention --we called this protected property
+        //this.locale = navigator.language;
+
+        console.log(`Thanks for opening an account ${this.owner}`);
+      }
+
+      // Public Method --methods that we are using in this class are public method
+      // API --public interface of Account object
+      getMovements() {
+        return this.#movements; // using public method can still have an access to the movs but cannot override them
+      }
+
+      deposit(val) {
+        this.#movements.push(val);
+      }
+
+      withdraw(val) {
+        this.deposit(-val);
+      }
+
+      requestLoan(val) {
+        if (this._approveLoan) {
+          this.deposit(val);
+          console.log("Loan is approved");
+        }
+      }
+
+      // Static Version
+      static helper() {
+        console.log("helper");
+      }
+
+      // Private methods
+      //#approveLoan(val){} --still not supported in chrome
+      _approveLoan(val) {
+        return true;
+      } // internal method --should not be part of public API
+    }
+
+    const acc1 = new Account("Jonas", "EUR", 1111);
+    acc1.deposit(250);
+    acc1.withdraw(140);
+    acc1.requestLoan(1000);
+    console.log(acc1);
+
+    // console.log(acc1.#movements); // syntax error: property is private and protected
+    // console.log(acc1.#pin);
+    // console.log(acc1.#approveLoad(1000)); // chrome read this as private fields not private method
+
+    // static version
+    Account.helper();
+    ```
 
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
 
