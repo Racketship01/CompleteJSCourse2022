@@ -620,16 +620,19 @@ class Account {
 
   deposit(val) {
     this.#movements.push(val);
+    return this;
   }
 
   withdraw(val) {
     this.deposit(-val);
+    return this;
   }
 
   requestLoan(val) {
     if (this._approveLoan) {
       this.deposit(val);
       console.log('Loan is approved');
+      return this;
     }
   }
 
@@ -657,3 +660,72 @@ console.log(acc1);
 
 // static version
 Account.helper();
+
+// Chaining Method
+acc1.deposit(300).deposit(500).withdraw(35).requestLoan(25000).withdraw(4000);
+console.log(acc1.getMovements());
+
+// NOTE: returning the 'this' keyword will make the method chainable --this will make most sense in methods that actually set some property
+
+///////////////////////////////////////////////////
+
+// Challeng 04
+class CarCL {
+  constructor(made, speed) {
+    this.made = made;
+    this.speed = speed;
+  }
+
+  accelerate() {
+    this.speed += 10;
+    console.log(`${this.made} is going at ${this.speed}km/h`);
+  }
+
+  brake() {
+    this.speed -= 5;
+    console.log(`${this.made} is decreasing speed at ${this.speed}km/h`);
+    return this;
+  }
+
+  get speedUS() {
+    return this.speed / 1.6;
+  }
+
+  set speedUS(speed) {
+    this.speed = speed * 1.6;
+  }
+}
+
+class EVCl extends CarCL {
+  #charge;
+
+  constructor(made, speed, charge) {
+    super(made, speed);
+    this.#charge = charge;
+  }
+
+  // Public API --that we can manipulate the charge property from outside but w/o being able to directly access the property
+  chargeBattery(chargeTo) {
+    this.#charge = chargeTo;
+    return this;
+  }
+
+  accelerate() {
+    this.speed += 20;
+    this.#charge--;
+    console.log(
+      `${this.made} going ${this.speed}km/h, with a charge of ${this.#charge}%`
+    );
+    return this;
+  }
+}
+
+const rivian = new EVCl('Rivian', 120, 23);
+console.log(rivian);
+// rivian.chargeBattery(30);
+// console.log(rivian);
+
+rivian.chargeBattery(30).accelerate().brake();
+//console.log(rivian.#charge);
+
+console.log(rivian.speedUS);

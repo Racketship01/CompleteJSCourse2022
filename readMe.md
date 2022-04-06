@@ -6176,6 +6176,25 @@ javascriptIsFun = "YES!";
     Account.helper();
     ```
 
+- Chaining Method
+
+  ```js
+  acc1.deposit(300).deposit(500).withdraw(35).requestLoan(25000).withdraw(4000);
+  console.log(acc1.getMovements());
+
+  // NOTE: returning the 'this' keyword will make the method chainable --this will make most sense in methods that actually set some property
+  ```
+
+- ES6 Classes Summary
+
+  ![](./img/es6ClassSum.png)
+
+  - NOTE: the difference between instance property and public fields is that we set these instance properties based on input data of the constructor --properties are more personalized and unique for each object while the fields are usually for something that is common to all the objects.
+
+  - getter -- method that we can get a value out of an object by simply writing a property instead of writing a method
+
+  - setter -- **--use \_underscore to set property with same method name** if you have a setter for a property that is already defined in the constructor, then you need to create basically a new property with the underscore in front of it. And then in the getter with the same name, you also need to then return that new property.
+
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
 
 ## Section 16: Asynchronous JS: Promises, Async/Awaits and AJAX
@@ -6190,4 +6209,4 @@ javascriptIsFun = "YES!";
 
 ## Differences Between Functional Programming vs OOP
 
-- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in functional programming is a declarative programming model, while object-oriented programming uses the imperative programming model. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key elements.
+- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in functional programming is a declarative programming model, while object-oriented programming uses the imperative programming model. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key elements
