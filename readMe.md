@@ -6197,6 +6197,94 @@ javascriptIsFun = "YES!";
 
 ## Section 15: Mapty App: OOP, Geolocation, External Libraries
 
+- Project Overview
+  ![](./img/Mapty-flowchart.png)
+
+  - The Mapty App is loaded from third party service
+  - the position is obtained by the browser using geolocation --JS will fetch the location and load a map on your current position
+  - Goal of the app: log my workouts
+
+- How to Plan a Web Project?
+
+  - Planning Step
+    ![](./img/planStep.png)
+
+    - 1. User Stories --a high level overview of the whole application that will allow developers to determine the exact features. --all user stories put together provide a clear picture of the application whole functionality
+         ![](./img/userStories.png)
+
+    - 2. Features --determine the exact features that we need to implement in order to make the user stories actually work as intended.
+         ![](./img/features.png)
+
+    - 3. Flowchart --to visualize the different actions that a user can take, and how the program react to these actions, we usually put all these features into a nice flow chart. --its a good idea to start with events of the page loading(page loads)
+         ![](./img/flowchart.png)
+
+      - Async means--the red box up there means that it is an operation that takes times some time and only after completed then the rest of the operations that depend on it can be executed --take NOTE: this flowchart itself has nothing to do yet with implementation itself
+
+    - 4. Architecture --how we will organize our code, and what JavaScript features we will use. So the project's architecture is essentially what holds all the code together. It gives us a structure in which we can then develop the application's functionality.
+
+    - GOAL: how to implement all the functionality. --all features before actually do it
+
+- Using the Geolocation API
+
+  - Geolocation API means is an API because it is in fact a browser API just like internationalization or timers
+
+  ```js
+  // Using the Geolocation API
+
+  if (navigator.geolocation)
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        const { latitude } = position.coords; // we simply use destructuring then create a variable called latitude based out of the latitude property of this object
+        const { longitude } = position.coords;
+        // console.log(latitude, longitude); //
+
+        console.log(`https://www.google.com/maps/@${latitude},${longitude}`); // coords of current location
+      },
+      function () {
+        alert("Could not get your position");
+      }
+    ); //1st argument: callback function that will be called on success wheneveer the browser successfully got the coordinates of the current position of the user 2nd argument: is the error callback which is the one that is gonna be called when error happened while getting the coordinates
+
+  // use if statement --to make sure we dont get any errors in an old browser, we can test if (navigation.geolocation) actually exists
+  ```
+
+- Displaying a Map using Leaflet Library
+
+  - Leaflet --is a third party library --an open source JS library for mobile-friendly interactive maps
+
+  ```js
+  if (navigator.geolocation)
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        const { latitude } = position.coords; // we simply use destructuring then create a variable called latitude based out of the latitude property of this object
+        const { longitude } = position.coords;
+        // console.log(latitude, longitude); //
+
+        console.log(`https://www.google.com/maps/@${latitude},${longitude}`); // coords of current location
+
+        const coords = [latitude, longitude];
+
+        // Displaying a Map using Leaflet Library
+        const map = L.map("map").setView(coords, 13); // we pass in the map method must be the ID name of an element in HTML -- L here this is basically the main function that Leaflet gives us as an entry point. Its kinda of namespace and L in the browser consle is a global variable inside of the script of leaflet that we then can access from all the other scripts.
+
+        L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map); // tiles --maps squares that appear one by one in every refresh || tileLayer --define the tiles of our map
+
+        L.marker(coords) // marker --render a map on our page with the coordinates
+          .addTo(map)
+          .bindPopup("A pretty CSS3 popup.<br> Easily customizable.")
+          .openPopup();
+      },
+      function () {
+        alert("Could not get your position");
+      }
+    );
+  ```
+
+- Display a Map Marker
+
 ## Section 16: Asynchronous JS: Promises, Async/Awaits and AJAX
 
 ## Section 17: Modern JS Development: Modules, Tooling and Function
@@ -6209,4 +6297,4 @@ javascriptIsFun = "YES!";
 
 ## Differences Between Functional Programming vs OOP
 
-- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in functional programming is a declarative programming model, while object-oriented programming uses the imperative programming model. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key elements
+- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in functional programming is a declarative programming model, while object-oriented programming uses the imperative programming model. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key element
