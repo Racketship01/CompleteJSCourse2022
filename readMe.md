@@ -6285,6 +6285,181 @@ javascriptIsFun = "YES!";
 
 - Display a Map Marker
 
+  ```js
+  // Displaying Map Marker
+      map.on('click', function (mapEvent) {
+        console.log(mapEvent);
+        const { lat, lng } = mapEvent.latlng;
+
+        L.marker([lat, lng]) // marker --used to display clickable/draggable icons on the map and passes coordinates (render a map on our page with the coordinates)
+          .addTo(map) // method that adds to the map
+          .bindPopup(
+            L.popup({
+              maxWidth: 250,
+              minWidth: 100,
+              autoClose: false,
+              closeOnClick: false,
+              className: 'running-popup', //can use to assign any CSS className to style
+            })
+          ) // create a popup and bind it to the marker --simply pass a string
+          .setPopupContent('Workout')
+          .openPopup();
+      }); // here we attached an eventlistener --this method is not coming from JS itself, instead of coming from the leaflet library. -- just like in standard JavaScript, we get access to an event, but this one is an event created by leaflet.So let's just call it mapEvent.
+
+      // NOTE: on method registers a handler, which is callback function with specific signature. Once an event is triggered, a handler is called. It receives necessary data as function parameters (commonly event object). --The on() method attaches one or more event handlers for the selected elements and child elements
+    }
+  ```
+
+- Rendering Workout Form
+
+  ```js
+  // Rendering workout form
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    // clear input fields
+    inputDistance.value =
+      inputDuration.value =
+      inputCadence.value =
+      inputElevation.value =
+        "";
+
+    // Display marker
+    console.log(mapEvent);
+    const { lat, lng } = mapEvent.latlng;
+
+    L.marker([lat, lng]) // marker --used to display clickable/draggable icons on the map and passes coordinates (render a map on our page with the coordinates)
+      .addTo(map) // method that adds to the map
+      .bindPopup(
+        L.popup({
+          maxWidth: 250,
+          minWidth: 100,
+          autoClose: false,
+          closeOnClick: false,
+          className: "running-popup", //can use to assign any CSS className to style
+        })
+      ) // create a popup and bind it to the marker --simply pass a string
+      .setPopupContent("Workout")
+      .openPopup();
+  });
+
+  inputType.addEventListener("change", function () {
+    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
+  });
+  ```
+
+- Project Architecture
+
+  > the most important aspect of any architecture is to decide where and how to store the data --because data is the most fundamental of any application
+
+  ![](./img/projectArch.png)
+
+  - Refractoring Proj Arch
+
+    ```js
+    // Refractorung for Project Architecture
+    class App {
+      #map;
+      #mapEvent;
+      constructor() {
+        this._getPosition();
+
+        // Rendering workout form
+        form.addEventListener(
+          "submit",
+          this._newWorkout.bind(this) // TIP: always bind the callback function in an event handler --event handler callback function will always have the this keyword in the DOM element (form)
+        ); // NOTE: JavaScript events are bound to the document object model (DOM) and aren't bound to any arbitrary object you might make. --attach the eventListener to the DOM elements here in the constructor
+
+        inputType.addEventListener("change", this._toggleElevationField);
+      } //constructor method is called immediately when new object is created from this class
+
+      _getPosition() {
+        // Display current positon(coordinates)
+        if (navigator.geolocation)
+          navigator.geolocation.getCurrentPosition(
+            this._loadMap.bind(this), // this keyword passed on the bind method points to the current object (class App)--_loadMap method called by _getCurrentPosition method here and treated as regular function call not method call --regular function this keyword is undefined
+            function () {
+              alert("Could not get your position");
+            }
+          );
+      }
+
+      // just a blueprint --we need to create an actual object out of the App class
+      _loadMap(position) {
+        console.log(position);
+        const { latitude } = position.coords;
+        const { longitude } = position.coords;
+        console.log(latitude, longitude); //
+
+        console.log(`https://www.google.com/maps/@${latitude},${longitude}`); // coords of current location
+
+        const coords = [latitude, longitude];
+
+        this.#map = L.map("map").setView(coords, 13);
+        console.log(this.#map);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(this.#map);
+
+        // Displaying Map Marker
+        // --handling clicks on map
+        this.#map.on("click", this._showForm.bind(this)); // same as event hanlders --this keyword is attached to the map library event itself (whom we attached the event handlers)
+      }
+
+      _showForm(mapE) {
+        this.#mapEvent = mapE;
+        form.classList.remove("hidden");
+        inputDistance.focus();
+      }
+
+      _toggleElevationField() {
+        inputElevation
+          .closest(".form__row")
+          .classList.toggle("form__row--hidden");
+        inputCadence
+          .closest(".form__row")
+          .classList.toggle("form__row--hidden");
+      }
+
+      _newWorkout(e) {
+        e.preventDefault();
+
+        // clear input fields
+        inputDistance.value =
+          inputDuration.value =
+          inputCadence.value =
+          inputElevation.value =
+            "";
+
+        // Display marker
+        // console.log(mapEvent);
+        const { lat, lng } = this.#mapEvent.latlng;
+
+        L.marker([lat, lng])
+          .addTo(this.#map)
+          .bindPopup(
+            L.popup({
+              maxWidth: 250,
+              minWidth: 100,
+              autoClose: false,
+              closeOnClick: false,
+              className: "running-popup",
+            })
+          )
+          .setPopupContent("Workout")
+          .openPopup();
+      }
+    }
+
+    const app = new App();
+    // app._getPosition(); // all code in top level scope --outside of any function will get executed immediatelt as the script loads
+
+    // NOTE: when calling function in an event handlers and in callback, the function will simply be called a regular function and regular function this keyword is undefined
+    ```
+
 ## Section 16: Asynchronous JS: Promises, Async/Awaits and AJAX
 
 ## Section 17: Modern JS Development: Modules, Tooling and Function
