@@ -6355,7 +6355,7 @@ javascriptIsFun = "YES!";
 
   ![](./img/projectArch.png)
 
-  - Refractoring Proj Arch
+  - Refractoring Proj Architecture
 
     ```js
     // Refractorung for Project Architecture
@@ -6459,6 +6459,55 @@ javascriptIsFun = "YES!";
 
     // NOTE: when calling function in an event handlers and in callback, the function will simply be called a regular function and regular function this keyword is undefined
     ```
+
+  - Managing Workout Data: Creating Classes
+
+    ```js
+    // Managing Workout Data: Creating classes
+    // Parent class
+    class Workout {
+      date = new Date();
+      id = (Date.now() + "").slice(-10); // NOTE:  in the real world, we usually always use some kind of library in order to create good and unique ID numbers. So usually we should never create IDs on our own but always let some library take care of that because this is a very important part of any application
+
+      constructor(coords, distance, duration) {
+        this.coords = coords; // [lat, lng]
+        this.distance = distance; // in km
+        this.duration = duration; // im min
+      }
+    }
+
+    // Child class
+    class Running extends Workout {
+      constructor(coords, distance, duration, cadence) {
+        super(coords, distance, duration);
+        this.cadence = cadence;
+
+        this.calcPace();
+      }
+
+      calcPace() {
+        // min/km
+        this.pace = this.duration / this.distance;
+        return this.pace;
+      }
+    }
+    class Cycling extends Workout {
+      constructor(coords, distance, duration, elevationGain) {
+        super(coords, distance, duration);
+        this.elevationGain = elevationGain;
+
+        this.calcSpeed();
+      }
+
+      calcSpeed() {
+        // min/km
+        this.speed = this.distance / (this.duration / 60);
+        return this.speed;
+      }
+    }
+    ```
+
+  - Creating new Workout
 
 ## Section 16: Asynchronous JS: Promises, Async/Awaits and AJAX
 

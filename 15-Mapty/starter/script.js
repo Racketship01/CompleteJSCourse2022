@@ -99,10 +99,65 @@ const inputElevation = document.querySelector('.form__input--elevation');
 // console.log(firstName); //  first name variable is a global variable here in this script. any variable that is global in any script will be available to all the other scripts while as long as they appear after that script here included in the HTML. So script.js has access to all the global variables in othe.js when other.js and leaflet.js but for example, other.js does not have access to anything from script.js because it appears afterwards
 ////////////////////////////////////////////////////////////
 
+// DATA
+// Managing Workout Data: Creating classes
+// Parent class
+class Workout {
+  date = new Date();
+  id = (Date.now() + '').slice(-10); // NOTE:  in the real world, we usually always use some kind of library in order to create good and unique ID numbers. So usually we should never create IDs on our own but always let some library take care of that because this is a very important part of any application
+
+  constructor(coords, distance, duration) {
+    this.coords = coords; // [lat, lng]
+    this.distance = distance; // in km
+    this.duration = duration; // im min
+  }
+}
+
+// Child class
+class Running extends Workout {
+  // public fields
+  type = 'running';
+
+  constructor(coords, distance, duration, cadence) {
+    super(coords, distance, duration);
+    this.cadence = cadence;
+    // this.type = 'running' --is same as above public fields
+
+    this.calcPace();
+  }
+
+  calcPace() {
+    // min/km
+    this.pace = this.duration / this.distance;
+    return this.pace;
+  }
+}
+class Cycling extends Workout {
+  type = 'cycling';
+  constructor(coords, distance, duration, elevationGain) {
+    super(coords, distance, duration);
+    this.elevationGain = elevationGain;
+
+    this.calcSpeed();
+  }
+
+  calcSpeed() {
+    // min/km
+    this.speed = this.distance / (this.duration / 60);
+    return this.speed;
+  }
+}
+// const run1 = new Running([14.5176, 121.0509], 5.2, 24, 178);
+// const cycle1 = new Cycling([14.5176, 121.0509], 27, 95, 523);
+// console.log(run1, cycle1);
+
+//********/
+// APPLICATION
 // Refractorung for Project Architecture
 class App {
   #map;
   #mapEvent;
+  #workouts = [];
   constructor() {
     this._getPosition();
 
@@ -115,8 +170,8 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
   } //constructor method is called immediately when new object is created from this class
 
+  // Display current positon(coordinates)
   _getPosition() {
-    // Display current positon(coordinates)
     if (navigator.geolocation)
       navigator.geolocation.getCurrentPosition(
         this._loadMap.bind(this), // this keyword passed on the bind method points to the current object (class App)--_loadMap method called by _getCurrentPosition method here and treated as regular function call not method call --regular function this keyword is undefined
@@ -146,12 +201,13 @@ class App {
     }).addTo(this.#map);
 
     // Displaying Map Marker
-    // --handling clicks on map
+    // --handling clicks on map leaflet library
     this.#map.on('click', this._showForm.bind(this)); // same as event hanlders --this keyword is attached to the map library event itself (whom we attached the event handlers)
   }
 
   _showForm(mapE) {
     this.#mapEvent = mapE;
+
     form.classList.remove('hidden');
     inputDistance.focus();
   }
@@ -161,21 +217,70 @@ class App {
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
   }
 
+  // Creating new Workout --features
   _newWorkout(e) {
+    const validInputs = (...inputs) =>
+      inputs.every(inp => Number.isFinite(inp)); // helper function
+    const allPositive = (...inputs) => inputs.every(inp => inp > 0);
     e.preventDefault();
 
-    // clear input fields
+    // Get data from the form
+    const type = inputType.value;
+    const distance = +inputDistance.value;
+    const duration = +inputDuration.value;
+    const { lat, lng } = this.#mapEvent.latlng;
+    let workout;
+
+    // If workout, create  running object
+    if (type === 'running') {
+      const cadence = +inputCadence.value;
+      // Check if data is valid
+      if (
+        // !Number.isFinite(distance) ||
+        // !Number.isFinite(duration) ||
+        // !Number.isFinite(cadence)
+        !validInputs(distance, duration, cadence) ||
+        !allPositive(distance, duration, cadence)
+      )
+        return alert('Input have to be positive numbers!'); // using guard clause --means check for the opposite of what we are interested in
+
+      workout = new Running([lat, lng], distance, duration, cadence);
+    }
+    // If workout, create cycling object
+    if (type === 'cycling') {
+      const elevation = +inputElevation.value;
+      // Check if data is valid
+      if (
+        !validInputs(distance, duration, elevation) ||
+        !allPositive(distance, duration)
+      )
+        return alert('Input have to be positive numbers!');
+
+      workout = new Cycling([lat, lng], distance, duration, elevation);
+    }
+
+    // Add new object to workout array
+    this.#workouts.push(workout);
+    console.log(workout);
+
+    // Render workout on map as marker
+    this.renderWorkoutMarker(workout);
+
+    // Render workout on list
+
+    // Hide form & clear input fields
     inputDistance.value =
       inputDuration.value =
       inputCadence.value =
       inputElevation.value =
         '';
+  }
 
+  renderWorkoutMarker(workout) {
     // Display marker
     // console.log(mapEvent);
-    const { lat, lng } = this.#mapEvent.latlng;
-
-    L.marker([lat, lng])
+    // const { lat, lng } = this.#mapEvent.latlng;
+    L.marker(workout.coords)
       .addTo(this.#map)
       .bindPopup(
         L.popup({
@@ -183,7 +288,7 @@ class App {
           minWidth: 100,
           autoClose: false,
           closeOnClick: false,
-          className: 'running-popup',
+          className: `${workout.type}-popup`,
         })
       )
       .setPopupContent('Workout')
@@ -192,6 +297,8 @@ class App {
 }
 
 const app = new App();
+console.log(app);
 // app._getPosition(); // all code in top level scope --outside of any function will get executed immediatelt as the script loads
 
 // NOTE: when calling function in an event handlers and in callback, the function will simply be called a regular function and regular function this keyword is undefined
+/////////////////////////////////////////////////////////////
