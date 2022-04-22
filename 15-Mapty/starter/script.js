@@ -1,7 +1,7 @@
 'use strict';
 
-// prettier-ignore
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+// // prettier-ignore
+// const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 // Selector
 const form = document.querySelector('.form');
@@ -99,17 +99,31 @@ const inputElevation = document.querySelector('.form__input--elevation');
 // console.log(firstName); //  first name variable is a global variable here in this script. any variable that is global in any script will be available to all the other scripts while as long as they appear after that script here included in the HTML. So script.js has access to all the global variables in othe.js when other.js and leaflet.js but for example, other.js does not have access to anything from script.js because it appears afterwards
 ////////////////////////////////////////////////////////////
 
-// DATA
+// *****DATA******
 // Managing Workout Data: Creating classes
 // Parent class
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10); // NOTE:  in the real world, we usually always use some kind of library in order to create good and unique ID numbers. So usually we should never create IDs on our own but always let some library take care of that because this is a very important part of any application
+  clicks = 0;
 
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat, lng]
     this.distance = distance; // in km
     this.duration = duration; // im min
+  }
+
+  _setDescription() {
+    // prettier-ignore
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
+      months[this.date.getMonth()]
+    } ${this.date.getDate()}`;
+  }
+
+  click() {
+    this.clicks++;
   }
 }
 
@@ -124,6 +138,7 @@ class Running extends Workout {
     // this.type = 'running' --is same as above public fields
 
     this.calcPace();
+    this._setDescription(); //calling from the parent class workout --child class contain the type field
   }
 
   calcPace() {
@@ -139,6 +154,7 @@ class Cycling extends Workout {
     this.elevationGain = elevationGain;
 
     this.calcSpeed();
+    this._setDescription();
   }
 
   calcSpeed() {
@@ -147,20 +163,25 @@ class Cycling extends Workout {
     return this.speed;
   }
 }
-// const run1 = new Running([14.5176, 121.0509], 5.2, 24, 178);
-// const cycle1 = new Cycling([14.5176, 121.0509], 27, 95, 523);
-// console.log(run1, cycle1);
+const run1 = new Running([14.5176, 121.0509], 5.2, 24, 178);
+const cycle1 = new Cycling([14.5176, 121.0509], 27, 95, 523);
+console.log(run1, cycle1);
 
-//********/
-// APPLICATION
+// ********APPLICATION***********
 // Refractorung for Project Architecture
 class App {
   #map;
+  #mapZoomLevel = 13;
   #mapEvent;
   #workouts = [];
   constructor() {
+    // Get position
     this._getPosition();
 
+    // Get data from local storage
+    this._getLocalStorage();
+
+    // **event handlers
     // Rendering workout form
     form.addEventListener(
       'submit',
@@ -168,6 +189,8 @@ class App {
     ); // NOTE: JavaScript events are bound to the document object model (DOM) and aren't bound to any arbitrary object you might make. --attach the eventListener to the DOM elements here in the constructor
 
     inputType.addEventListener('change', this._toggleElevationField);
+
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   } //constructor method is called immediately when new object is created from this class
 
   // Display current positon(coordinates)
@@ -188,11 +211,11 @@ class App {
     const { longitude } = position.coords;
     console.log(latitude, longitude); //
 
-    console.log(`https://www.google.com/maps/@${latitude},${longitude}`); // coords of current location
+    //console.log(`https://www.google.com/maps/@${latitude},${longitude}`); // coords of current location
 
     const coords = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, 13);
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
     console.log(this.#map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
@@ -203,13 +226,31 @@ class App {
     // Displaying Map Marker
     // --handling clicks on map leaflet library
     this.#map.on('click', this._showForm.bind(this)); // same as event hanlders --this keyword is attached to the map library event itself (whom we attached the event handlers)
+
+    // Render map marker from local storage
+    this.#workouts.forEach(work => this._renderWorkout(work));
   }
 
   _showForm(mapE) {
     this.#mapEvent = mapE;
+    // mapEvent --an event created by leaflet library --event object take the lat&lng upon clicking on map and then add a marker
 
     form.classList.remove('hidden');
     inputDistance.focus();
+  }
+
+  _hideForm() {
+    // Empty input fields
+    inputDistance.value =
+      inputDuration.value =
+      inputCadence.value =
+      inputElevation.value =
+        '';
+
+    // Dirty tricks
+    form.style.display = 'none';
+    form.classList.add('hidden');
+    setTimeout(() => (form.style.display = 'grid'), 1000);
   }
 
   _toggleElevationField() {
@@ -264,20 +305,20 @@ class App {
     console.log(workout);
 
     // Render workout on map as marker
-    this.renderWorkoutMarker(workout);
+    this._renderWorkoutMarker(workout);
 
     // Render workout on list
+    this._renderWorkout(workout);
 
     // Hide form & clear input fields
-    inputDistance.value =
-      inputDuration.value =
-      inputCadence.value =
-      inputElevation.value =
-        '';
+    this._hideForm();
+
+    // Set localStorage to all workouts
+    this._setLocalStorage();
   }
 
-  renderWorkoutMarker(workout) {
-    // Display marker
+  // Display marker
+  _renderWorkoutMarker(workout) {
     // console.log(mapEvent);
     // const { lat, lng } = this.#mapEvent.latlng;
     L.marker(workout.coords)
@@ -291,8 +332,93 @@ class App {
           className: `${workout.type}-popup`,
         })
       )
-      .setPopupContent('Workout')
+      .setPopupContent(
+        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
+      )
       .openPopup();
+  }
+
+  // Rendering Workout --list
+  _renderWorkout(workout) {
+    let html = `
+    <li class="workout workout--${workout.type}" data-id="${workout.id}">
+    <h2 class="workout__title">${workout.description}</h2>
+    <div class="workout__details">
+      <span class="workout__icon">${
+        workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
+      }</span>
+      <span class="workout__value">${workout.distance}</span>
+      <span class="workout__unit">km</span>
+    </div>
+    <div class="workout__details">
+      <span class="workout__icon">⏱</span>
+      <span class="workout__value">${workout.duration}</span>
+      <span class="workout__unit">min</span>
+    </div>`;
+
+    if (workout.type === 'running')
+      html += `
+    <div class="workout__details">
+      <span class="workout__icon">⚡️</span>
+      <span class="workout__value">${workout.pace.toFixed()}</span>
+      <span class="workout__unit">min/km</span>
+    </div>
+    <div class="workout__details">
+      <span class="workout__icon">🦶🏼</span>
+      <span class="workout__value">${workout.cadence}</span>
+      <span class="workout__unit">spm</span>
+    </div>`;
+
+    if (workout.type === 'cycling')
+      html += ` <div class="workout__details">
+      <span class="workout__icon">⚡️</span>
+      <span class="workout__value">${workout.speed.toFixed()}</span>
+      <span class="workout__unit">km/h</span>
+    </div>
+    <div class="workout__details">
+      <span class="workout__icon">⛰</span>
+      <span class="workout__value">${workout.elevationGain}</span>
+      <span class="workout__unit">m</span>
+    </div>`;
+
+    form.insertAdjacentHTML('afterend', html);
+  }
+
+  // Move map marker on click
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest('.workout');
+    console.log(workoutEl);
+
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(
+      work => work.id === workoutEl.dataset.id
+    );
+    console.log(workout);
+
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
+
+    workout.click();
+  }
+
+  _setLocalStorage() {
+    // local storage(very simple API) is simple key value store
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts)); // 1st argument: give name(key) and 2nd argument: simple value --needs to be string to store and which is associated with a key
+    // TIP: we can convert object to string using JSON.stringify(). Dont use local storage to store large amount of data
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    console.log(data);
+
+    this.#workouts = data;
+
+    this.#workouts.forEach(work => this._renderWorkout(work));
   }
 }
 
