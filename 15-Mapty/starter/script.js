@@ -170,6 +170,7 @@ class Cycling extends Workout {
 // ********APPLICATION***********
 // Refractorung for Project Architecture
 
+const buttonDelAll = document.querySelector('.btn--delAll');
 class App {
   #map;
   #mapZoomLevel = 13;
@@ -195,6 +196,8 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
 
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+
+    this.feature();
   } //constructor method is called immediately when new object is created from this class
 
   // Display current positon(coordinates)
@@ -241,6 +244,10 @@ class App {
   _renderingForm() {
     form.addEventListener('submit', this._newWorkout.bind(this));
     //return this;
+  }
+
+  calling() {
+    this._renderingForm();
   }
 
   _showForm(mapE) {
@@ -400,65 +407,82 @@ class App {
     
     `;
     form.insertAdjacentHTML('afterend', html);
-
-    // let test = document.querySelector(`[data-id="${workout.id}"]`);
-    // test.addEventListener('click', () => {
-    //   console.log('hello');
-    // });
-
     const buttonEdit = document.querySelector('.btn-edit');
-    // console.log(buttonEdit);
-    // let render;
-
     buttonEdit.addEventListener('click', function (e) {
       const workoutEl = e.target.closest('.workout');
       if (workout.id === workoutEl.dataset.id) {
         console.log('EDIT');
-        // render = this._renderingForm();
-
-        // form.addEventListener('submit', this._newWorkout.bind(this));
-        const workoutEl = e.target.closest('.workout');
 
         const data = JSON.parse(localStorage.getItem('workouts'));
-        // console.log(data);
 
         if (!data) return;
 
         this.workout = data;
 
-        data.find(work => {
+        data.forEach(work => {
           if (work.id === workoutEl.dataset.id) {
             form.classList.remove('hidden');
             inputDistance.focus();
-
-            this.calling();
+            this.edit();
           }
         });
       }
-
-      // return render;
     });
+    // let test = document.querySelector(`[data-id="${workout.id}"]`);
+    // test.addEventListener('click', () => {
+    //   console.log('hello');
+    // });
 
-    const buttonDel = document.querySelector('.btn-delete');
+    // const buttonEdit = document.querySelector('.btn-edit');
     // console.log(buttonEdit);
+    // let render;
 
-    buttonDel.addEventListener('click', function (e) {
-      const workoutEl = e.target.closest('.workout');
+    // buttonEdit.addEventListener('click', function (e) {
+    //   const workoutEl = e.target.closest('.workout');
+    //   if (workout.id === workoutEl.dataset.id) {
+    //     console.log('EDIT');
+    //
 
-      const data = JSON.parse(localStorage.getItem('workouts'));
-      // console.log(data);
+    //     const data = JSON.parse(localStorage.getItem('workouts'));
+    //
 
-      if (!data) return;
+    //     if (!data) return;
 
-      this.workout = data;
+    //     this.workout = data;
 
-      data.find(work => {
-        if (work.id === workoutEl.dataset.id) {
-          localStorage.removeItem('workouts');
-          location.reload();
-        }
-      });
-    });
+    //     data.forEach(work => {
+    //       if (work.id === workoutEl.dataset.id) {
+    //         form.classList.remove('hidden');
+    //         inputDistance.focus();
+
+    //
+    //       }
+    //     });
+    //   }
+
+    //   // return render;
+    // });
+
+    // const buttonDel = document.querySelector('.btn-delete');
+    // // console.log(buttonEdit);
+
+    // buttonDel.addEventListener('click', function (e) {
+    //   const workoutEl = e.target.closest('.workout');
+
+    //   const data = JSON.parse(localStorage.getItem('workouts'));
+    //   // console.log(data);
+
+    //   if (!data) return;
+
+    //   this.workout = data;
+
+    //   data.find(work => {
+    //     if (work.id === workoutEl.dataset.id) {
+    //       localStorage.removeItem('workouts');
+    //       location.reload();
+    //     }
+    //   });
+    // });
   }
 
   // Move map marker on click
@@ -508,8 +532,17 @@ class App {
     location.reload();
   }
 
-  calling() {
+  feature() {
+    buttonDelAll.addEventListener('click', this.delete.bind(this));
+    // buttonEdit.addEventListener('click', this.edit.bind(this));
+  }
+
+  edit() {
     this._renderingForm();
+  }
+
+  delete() {
+    this.reset();
   }
 }
 
