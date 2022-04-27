@@ -54,6 +54,51 @@ a:visited {
   align-self: center;
   margin-bottom: 4rem;
 }
+/* 
+.delAll-feature {
+  
+} */
+
+.btn,
+.btn:link,
+.btn:visited {
+  text-decoration: none;
+  font-size: 1.6rem;
+  padding: 0.5rem 0.2rem;
+  border-radius: 5px;
+
+  margin-bottom: 1.4rem;
+  width: 10rem;
+
+  /* Only necessary for .btn */
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+
+  /* Put transition on original "state" */
+  /* transition: background-color 0.3s; */
+  transition: all 0.3s;
+
+  background-color: var(--color-dark--2);
+  color: #fff;
+}
+
+.btn:hover,
+.btn:active {
+  background-color: #fff;
+  color: var(--color-dark--2);
+}
+
+.btn-edit,
+.btn-delete {
+  height: 2.4rem;
+  width: 2.4rem;
+}
+
+.btn.feats {
+  display: flex;
+  justify-content: flex-start;
+}
 
 .workouts {
   list-style: none;
@@ -64,6 +109,14 @@ a:visited {
 
 .workouts::-webkit-scrollbar {
   width: 0;
+}
+
+.workout__feature {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  grid-column: 1 / -1;
 }
 
 .workout {
@@ -87,7 +140,7 @@ a:visited {
 .workout__title {
   font-size: 1.7rem;
   font-weight: 600;
-  grid-column: 1 / -1;
+  /* grid-column: 1 / -1; */
 }
 
 .workout__details {

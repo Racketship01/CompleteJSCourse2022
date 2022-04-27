@@ -163,17 +163,19 @@ class Cycling extends Workout {
     return this.speed;
   }
 }
-const run1 = new Running([14.5176, 121.0509], 5.2, 24, 178);
-const cycle1 = new Cycling([14.5176, 121.0509], 27, 95, 523);
-console.log(run1, cycle1);
+// const run1 = new Running([14.5176, 121.0509], 5.2, 24, 178);
+// const cycle1 = new Cycling([14.5176, 121.0509], 27, 95, 523);
+// console.log(run1, cycle1);
 
 // ********APPLICATION***********
 // Refractorung for Project Architecture
+
 class App {
   #map;
   #mapZoomLevel = 13;
   #mapEvent;
   #workouts = [];
+
   constructor() {
     // Get position
     this._getPosition();
@@ -181,12 +183,14 @@ class App {
     // Get data from local storage
     this._getLocalStorage();
 
+    this._renderingForm();
+
     // **event handlers
     // Rendering workout form
-    form.addEventListener(
-      'submit',
-      this._newWorkout.bind(this) // TIP: always bind the callback function in an event handler --event handler callback function will always have the this keyword in the DOM element (form)
-    ); // NOTE: JavaScript events are bound to the document object model (DOM) and aren't bound to any arbitrary object you might make. --attach the eventListener to the DOM elements here in the constructor
+    // form.addEventListener(
+    //   'submit',
+    //   this._newWorkout.bind(this) // TIP: always bind the callback function in an event handler --event handler callback function will always have the this keyword in the DOM element (form)
+    // ); // NOTE: JavaScript events are bound to the document object model (DOM) and aren't bound to any arbitrary object you might make. --attach the eventListener to the DOM elements here in the constructor
 
     inputType.addEventListener('change', this._toggleElevationField);
 
@@ -209,14 +213,14 @@ class App {
     console.log(position);
     const { latitude } = position.coords;
     const { longitude } = position.coords;
-    console.log(latitude, longitude); //
+    // console.log(latitude, longitude); //
 
     //console.log(`https://www.google.com/maps/@${latitude},${longitude}`); // coords of current location
 
     const coords = [latitude, longitude];
 
     this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
-    console.log(this.#map);
+    // console.log(this.#map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
@@ -228,7 +232,15 @@ class App {
     this.#map.on('click', this._showForm.bind(this)); // same as event hanlders --this keyword is attached to the map library event itself (whom we attached the event handlers)
 
     // Render map marker from local storage
-    this.#workouts.forEach(work => this._renderWorkout(work));
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
+  }
+
+  // rendering form
+  _renderingForm() {
+    form.addEventListener('submit', this._newWorkout.bind(this));
+    //return this;
   }
 
   _showForm(mapE) {
@@ -302,7 +314,7 @@ class App {
 
     // Add new object to workout array
     this.#workouts.push(workout);
-    console.log(workout);
+    // console.log(workout);
 
     // Render workout on map as marker
     this._renderWorkoutMarker(workout);
@@ -342,7 +354,16 @@ class App {
   _renderWorkout(workout) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
+    <div class="workout__feature">
     <h2 class="workout__title">${workout.description}</h2>
+      <div class="btn--feats">
+      <button class = "btn btn-edit"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+    </svg></button>
+      <button class = "btn btn-delete"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg></button> </div>
+    </div>
     <div class="workout__details">
       <span class="workout__icon">${
         workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
@@ -375,26 +396,82 @@ class App {
       <span class="workout__value">${workout.speed.toFixed()}</span>
       <span class="workout__unit">km/h</span>
     </div>
-    <div class="workout__details">
-      <span class="workout__icon">⛰</span>
-      <span class="workout__value">${workout.elevationGain}</span>
-      <span class="workout__unit">m</span>
-    </div>`;
-
+    
+    
+    `;
     form.insertAdjacentHTML('afterend', html);
+
+    // let test = document.querySelector(`[data-id="${workout.id}"]`);
+    // test.addEventListener('click', () => {
+    //   console.log('hello');
+    // });
+
+    const buttonEdit = document.querySelector('.btn-edit');
+    // console.log(buttonEdit);
+    // let render;
+
+    buttonEdit.addEventListener('click', function (e) {
+      const workoutEl = e.target.closest('.workout');
+      if (workout.id === workoutEl.dataset.id) {
+        console.log('EDIT');
+        // render = this._renderingForm();
+
+        // form.addEventListener('submit', this._newWorkout.bind(this));
+        const workoutEl = e.target.closest('.workout');
+
+        const data = JSON.parse(localStorage.getItem('workouts'));
+        // console.log(data);
+
+        if (!data) return;
+
+        this.workout = data;
+
+        data.find(work => {
+          if (work.id === workoutEl.dataset.id) {
+            form.classList.remove('hidden');
+            inputDistance.focus();
+
+            this.calling();
+          }
+        });
+      }
+
+      // return render;
+    });
+
+    const buttonDel = document.querySelector('.btn-delete');
+    // console.log(buttonEdit);
+
+    buttonDel.addEventListener('click', function (e) {
+      const workoutEl = e.target.closest('.workout');
+
+      const data = JSON.parse(localStorage.getItem('workouts'));
+      // console.log(data);
+
+      if (!data) return;
+
+      this.workout = data;
+
+      data.find(work => {
+        if (work.id === workoutEl.dataset.id) {
+          localStorage.removeItem('workouts');
+          location.reload();
+        }
+      });
+    });
   }
 
   // Move map marker on click
   _moveToPopup(e) {
     const workoutEl = e.target.closest('.workout');
-    console.log(workoutEl);
+    //console.log(workoutEl);
 
     if (!workoutEl) return;
 
     const workout = this.#workouts.find(
       work => work.id === workoutEl.dataset.id
     );
-    console.log(workout);
+    // console.log(workout);
 
     this.#map.setView(workout.coords, this.#mapZoomLevel, {
       animate: true,
@@ -403,7 +480,8 @@ class App {
       },
     });
 
-    workout.click();
+    // using the public interface
+    // workout.click();
   }
 
   _setLocalStorage() {
@@ -414,17 +492,33 @@ class App {
 
   _getLocalStorage() {
     const data = JSON.parse(localStorage.getItem('workouts'));
-    console.log(data);
+    // console.log(data);
+
+    if (!data) return;
 
     this.#workouts = data;
 
     this.#workouts.forEach(work => this._renderWorkout(work));
   }
+  // NOTE: when converted objects to a string and convert it back to object, the prototype chain is lost, so the new object recovered from the local storage are now just regular object (not same object created by OOP) therefore not inherit the method --to solve, 1: restore the object in the local storage and loop over then restore the object by creating a new object using class 2: simple disable the functionality of counting clicks
+
+  // public interface
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
+  }
+
+  calling() {
+    this._renderingForm();
+  }
 }
 
 const app = new App();
-console.log(app);
+
 // app._getPosition(); // all code in top level scope --outside of any function will get executed immediatelt as the script loads
 
 // NOTE: when calling function in an event handlers and in callback, the function will simply be called a regular function and regular function this keyword is undefined
-/////////////////////////////////////////////////////////////
+
+// Final Consideration
+
+////////////////////////////////////////////////////////

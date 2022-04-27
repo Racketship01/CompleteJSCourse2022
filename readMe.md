@@ -6351,6 +6351,10 @@ javascriptIsFun = "YES!";
 
 - Project Architecture
 
+  ![](./15-Mapty/final/Mapty-architecture-part-1.png)
+
+  ![](./15-Mapty/final/Mapty-architecture-final.png)
+
   > the most important aspect of any architecture is to decide where and how to store the data --because data is the most fundamental of any application
 
   ![](./img/projectArch.png)
@@ -6429,6 +6433,7 @@ javascriptIsFun = "YES!";
     #mapZoomLevel = 13;
     #mapEvent;
     #workouts = [];
+    clicks = 0;
     constructor() {
       this._getPosition();
 
@@ -6439,6 +6444,10 @@ javascriptIsFun = "YES!";
       ); // NOTE: JavaScript events are bound to the document object model (DOM) and aren't bound to any arbitrary object you might make. --attach the eventListener to the DOM elements here in the constructor
 
       inputType.addEventListener("change", this._toggleElevationField);
+
+      click() {
+        this.clicks++;
+      }
     } //constructor method is called immediately when new object is created from this class
 
     // Display current positon(coordinates)
@@ -6481,6 +6490,7 @@ javascriptIsFun = "YES!";
       // here we attached an eventlistener --this method is not coming from JS itself, instead of coming from the leaflet library. -- just like in standard JavaScript, we get access to an event, but this one is an event created by leaflet.So let's just call it mapEvent.
 
       // NOTE: on method registers a handler, which is callback function with specific signature. Once an event is triggered, a handler is called. It receives necessary data as function parameters (commonly event object). --The on() method attaches one or more event handlers for the selected elements and child elements
+      this.#workouts.forEach((work) => this._renderWorkoutMarker(work));
     }
 
     _showForm(mapE) {
@@ -6512,7 +6522,7 @@ javascriptIsFun = "YES!";
       inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
     }
 
-    // Creating new Workout --features
+    // **Creating new Workout --features
     _newWorkout(e) {
       const validInputs = (...inputs) =>
         inputs.every((inp) => Number.isFinite(inp)); // helper function
@@ -6568,7 +6578,7 @@ javascriptIsFun = "YES!";
       this._hideForm();
     }
 
-    // Display marker
+    // **Display marker
     _renderWorkoutMarker(workout) {
       // console.log(mapEvent);
       // const { lat, lng } = this.#mapEvent.latlng;
@@ -6589,7 +6599,7 @@ javascriptIsFun = "YES!";
         .openPopup();
     }
 
-    // Rendering Workout --list
+    // **Rendering Workout --list
     _renderWorkout(workout) {
       let html = `
         <li class="workout workout--${workout.type}" data-id="${workout.id}">
@@ -6635,7 +6645,7 @@ javascriptIsFun = "YES!";
       form.insertAdjacentHTML("afterend", html);
     }
 
-    // Move map marker on click
+    // **Move map marker on click
     _moveToPopup(e) {
       const workoutEl = e.target.closest(".workout");
       console.log(workoutEl);
@@ -6654,7 +6664,33 @@ javascriptIsFun = "YES!";
         },
       });
 
-      workout.click();
+      // using the public interface
+      // workout.click();
+    }
+
+    // **Working with local Storage
+    _setLocalStorage() {
+      // local storage(very simple API) is simple key value store
+      localStorage.setItem("workouts", JSON.stringify(this.#workouts)); // 1st argument: give name(key) and 2nd argument: simple value --needs to be string to store and which is associated with a key
+      // TIP: we can convert object to string using JSON.stringify(). Dont use local storage to store large amount of data
+    }
+
+    _getLocalStorage() {
+      const data = JSON.parse(localStorage.getItem("workouts"));
+      console.log(data);
+
+      if (!data) return;
+
+      this.#workouts = data;
+
+      this.#workouts.forEach((work) => this._renderWorkout(work));
+    }
+    // NOTE: when converted objects to a string and convert it back to object, the prototype chain is lost, so the new object recovered from the local storage are now just regular object (not same object created by OOP) therefore not inherit the method --to solve, 1: restore the object in the local storage and loop over then restore the object by creating a new object using class 2: simple disable the functionality of counting clicks
+
+    // public interface
+    reset() {
+      localStorage.removeItem("workouts");
+      location.reload();
     }
   }
 
