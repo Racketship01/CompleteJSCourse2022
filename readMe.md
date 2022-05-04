@@ -6703,6 +6703,142 @@ javascriptIsFun = "YES!";
 
 ## Section 16: Asynchronous JS: Promises, Async/Awaits and AJAX
 
+![](./img/synch.png)
+
+- Asynchronous JS, AJAX and APIs
+
+  ![](./img/asynch2.png)
+
+  - In summary, **Asynchronous Progamming** is all about coordinating the behaviour of our program over a certain period of time. In other words, literally means not occuring at the same time.
+  - most popular use cases of asynchronuos JS is to make so called AJAX calls to APIs
+
+  ![](./img/asynch1.png)
+
+  - we encountered the set timeout function, which will basically start a timer in an asynchronous way. So this means that the timer will essentially run in the background without preventing the main code from executing.
+  - the callback function(setTimeout method) is the asynch JS --because its only going to be executed after a task that is running in the background finishes execution
+
+  ![](./img/asynch3.png)
+
+  - when timer finishes after 5seconds, the callback function will finally be executed as well(this callback runs after all the other code even though in code it doesnt appear at the end)
+  - in async, an action was deferred(delayed or postpone for a while) into the future in order to make the code non-blocking
+  - keep in mind that CB function alone doesnt make the code async, only certain functions such as setTimeout work in an an async way.
+  - Other example: Loading img with event and callback
+    ![](./img/asynch4.png)
+
+    - the first two lines run in synch way
+    - now in 2nd line, by setting an attribute of img --this operation is actually async (setting the src attribute of any img is essentially loading an img in the background while the rest of the code can keep running)
+    - Now, once the image has finished loading, a load event will automatically be emitted by JavaScript. And so we can then listen for that event in order to act on it. (image is loading asynchronously in the background but not the fact that we are listening for the load events to happen)
+    - Also eventListeners alone do not make code async
+
+  - AJAX
+    ![](./img/ajax.png)
+    - Now in practice we make Ajax calls in our code in order to request some data from a web server dynamically without reloading the page so that we can use that data in our application dynamically
+    - AJAX's most appealing characteristic is its "asynchronous" nature, which means it can **communicate with the server, exchange data, and update the page without having to refresh the page**.
+    - The two major features of AJAX allow you to do the following:
+      - a. Make requests to the server without reloading the page
+      - b. Receive and work with data from the server
+  - APIs
+    ![](./img/api.png)
+
+    - DOM API -- APIs for manipulating documents loaded into the browser. The most obvious example is the DOM (Document Object Model) API, which allows you to manipulate HTML and CSS — creating, removing and changing HTML, dynamically applying new styles to your page, etc. Every time you see a popup window appear on a page or some new content displayed, for example, that's the DOM in action.
+
+    - Own Class API -- we can always implement a small and simple API in a class where we make some methods available as a public interface. Objects made from a class can be seen as self-contained encapsulated pieces of software that other pieces of software can interact with
+
+    - Online API --is essentially an application running on a web server, which receives requests for data, then retrieves this data from some database and then sends it back to the client.
+
+      - XML is a data format which used to be widely used to transmit data on the web but in not anymore in use. Instead most API these days use the JSON data format--basically just JS object but converted to a string
+
+- Our First AJAX Calls: XMLHttpRequest()
+
+  - XMLHttpRequest (XHR) objects are used to interact with servers. You can retrieve data from a URL without having to do a full page refresh. This enables a Web page to update just part of a page without disrupting what the user is doing. XMLHttpRequest is used heavily in AJAX programming.
+  - NOTE: API URL for the whole section: https://restcountries.com/v2/
+  - Requesting: open() method
+    - The first parameter of the call to open() is the HTTP request method – GET, POST, HEAD, or another method supported by your server. Keep the method all-capitals as per the HTTP standard
+    - The second parameter is the URL you're sending the request to. As a security feature, you cannot call URLs on 3rd-party domains by default.
+
+  ```js
+  // First AJAX call: XMLHttpRequest
+
+  const getCountryData = function (country) {
+    // old way of AJAX calls
+    const request = new XMLHttpRequest(); // allows to make request to the server
+    request.open("GET", `https://restcountries.com/v2/name/${country}`); //  open method --basically open the request 1st: request method(GET, POST, HEAD,) to GET data, 2nd: URL --this get method uses to open the request
+    request.send(); // send method --sending off request (will send of request in the URL declare at open method)
+
+    //  AJAX call that we just send off here, is being done in the background, while the rest of the code keeps running. And so this is the asynchronous, non-blocking behavior. (same with img src --need to wait for load event, once done it will emit the fetched data in the load event)
+
+    // to get the result being sent --need to register a callback on the new object created (request) for the load event.
+    request.addEventListener("load", function () {
+      // using this event listener we are waiting for that event. as data arrices, callback functionn will be called
+
+      //console.log(this.responseText); // responseText property --only gonna be set once the data has actually arrived.
+
+      // when data arrived --need to convert the JSON(big string of text) into JS object
+      const [data] = JSON.parse(this.responseText);
+      console.log(data);
+
+      const html = ` <article class="country">
+        <img class="country__img" src="${data.flag}" />
+        <div class="country__data">
+            <h3 class="country__name">${data.name}</h3>
+            <h4 class="country__region">${data.region}</h4>
+            <p class="country__row"><span>👫 </span>${(
+              +data.population / 1000000
+            ).toFixed(1)}</p>
+            <p class="country__row"><span>🗣️ </span>${
+              data.languages[0].name
+            }</p>
+            <p class="country__row"><span>💰 </span>${
+              data.currencies[0].name
+            }</p>
+        </div>
+        </article>`;
+
+      countriesContainer.insertAdjacentHTML("beforeend", html);
+      countriesContainer.style.opacity = 1;
+    });
+  };
+  getCountryData("philippines");
+  getCountryData("japan");
+  getCountryData("australia");
+
+  // NOTE: basically having 3 AJAX calls as we called function at same time, they might appear in different order because of data arrives slightly different time.
+  ```
+
+- [OPTIONAL] How the Web Works: Request and Response
+
+  - High level Overview
+
+    - Web Server
+
+      - harware --computer that stores web server software and a website components files --connects to the internet and support physical data interchaneg with other devices coonected to the web
+      - software --includes several parts that control how web users access hosted files. HTTP server-- can be accessed through domain names and delivers the content of hosted website to users --http is a protocol browser uses to view webpages.
+
+    - Request-Response Model / Client-Server Architecture
+      ![](./img/RRM.png)
+      - Whenever we try to access a Web server, the browser, which is the client, sends a request to the server and the server will then send back a response and that response contains the data or the Web page that we requested.
+      - https://restcountries.com/v2/name/portugal -- protocol, domain name and resource
+      - domain name --not the real address of the server, need a way to convert to real address of server, happens through so-called DNS(domain name server) --special kind of server like a phone of the internet that convert domain name to the real IP address.
+      - **STEP** accessing web server
+        ![](./img/http.png)
+        - 1st: when accessing any web server, the browser makes a reqs to a DNS then simply match the web address of URL to the servers real IP address (actually happens through internet service provider). --after converting to real IP address, DNS generater new address (e.g https://104.271.142.889.443) protocol, IP address and port number --identify specific service that running on a server (like a subaddress)
+          ![](./img/http1.png)
+        - 2nd: once we have real IP add, a TCP socket connection is established between the browser and the server. And this connection is typically kept alive for the entire time that it takes to transfer all files of the Website or all data. TCP and IP --communication protocols that defines exactly how data travel accross the Web(Internets Fundamental Control System)
+          ![](./img/http2.png)
+        - 3rd: Make our request --HTTP request **another communication protocol-simply system of rules that allows 2 or more parties to communicate. they are the ones set rules how data moves on the internet** HTTP--protocol that allows clients and web server to communicate (thru) request and response msg from client to server and back [HTTP method: GET -> requesting data, POST -> sending data, PUT & PATCH -> modify data] [request target --where the server is told that we want to access resource --if target reqs is just a slash and empty then we would be accessing the website route (the domain name)] NOTE: main difference between HTTP and HTTPS is that HTTPS is encrypted using TLS or SS
+          ![](./img/http3.png)
+        - 4: HTTP Response --status code and message used to let client know whether the reqs has been failed or not (200 means okay, 404 means page not found)
+          ![](./img/http4.png)
+        - 5: HTTP reqs in Web Page --many more reqs and reponse. Each different file there will be new HTTP reqs made to the server basically this entire back and forth between client and server happens for every single file that is included in the Web page.
+
+  - Transmission Control Protocol(TCP)
+    ![](./img/http5.png)
+    - first the job of TCP is to break the requests and responses down into thousands of small chunks, called packets before they are sent.
+    - once the packet arrive at final destination, TCP will reassemble all the packets into the original reqs or response (for each packets can take different route through internet for data travel faster)
+  - Internet Protocol(IP)
+    - second part, the job of IP protocol is to actually send and route these packets through the internet.
+    - It ensures that they arrive at the correct destination using IP address on each packet
+
 ## Section 17: Modern JS Development: Modules, Tooling and Function
 
 ## Section 18: Forkify App: Building a Modern Application

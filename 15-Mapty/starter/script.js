@@ -171,6 +171,7 @@ class Cycling extends Workout {
 // Refractorung for Project Architecture
 
 const buttonDelAll = document.querySelector('.btn--delAll');
+let buttonEdit;
 class App {
   #map;
   #mapZoomLevel = 13;
@@ -243,11 +244,6 @@ class App {
   // rendering form
   _renderingForm() {
     form.addEventListener('submit', this._newWorkout.bind(this));
-    //return this;
-  }
-
-  calling() {
-    this._renderingForm();
   }
 
   _showForm(mapE) {
@@ -407,82 +403,13 @@ class App {
     
     `;
     form.insertAdjacentHTML('afterend', html);
-    const buttonEdit = document.querySelector('.btn-edit');
-    buttonEdit.addEventListener('click', function (e) {
-      const workoutEl = e.target.closest('.workout');
-      if (workout.id === workoutEl.dataset.id) {
-        console.log('EDIT');
 
-        const data = JSON.parse(localStorage.getItem('workouts'));
-
-        if (!data) return;
-
-        this.workout = data;
-
-        data.forEach(work => {
-          if (work.id === workoutEl.dataset.id) {
-            form.classList.remove('hidden');
-            inputDistance.focus();
-            this.edit();
-          }
-        });
-      }
-    });
     // let test = document.querySelector(`[data-id="${workout.id}"]`);
     // test.addEventListener('click', () => {
     //   console.log('hello');
     // });
 
-    // const buttonEdit = document.querySelector('.btn-edit');
-    // console.log(buttonEdit);
-    // let render;
-
-    // buttonEdit.addEventListener('click', function (e) {
-    //   const workoutEl = e.target.closest('.workout');
-    //   if (workout.id === workoutEl.dataset.id) {
-    //     console.log('EDIT');
-    //
-
-    //     const data = JSON.parse(localStorage.getItem('workouts'));
-    //
-
-    //     if (!data) return;
-
-    //     this.workout = data;
-
-    //     data.forEach(work => {
-    //       if (work.id === workoutEl.dataset.id) {
-    //         form.classList.remove('hidden');
-    //         inputDistance.focus();
-
-    //
-    //       }
-    //     });
-    //   }
-
-    //   // return render;
-    // });
-
-    // const buttonDel = document.querySelector('.btn-delete');
-    // // console.log(buttonEdit);
-
-    // buttonDel.addEventListener('click', function (e) {
-    //   const workoutEl = e.target.closest('.workout');
-
-    //   const data = JSON.parse(localStorage.getItem('workouts'));
-    //   // console.log(data);
-
-    //   if (!data) return;
-
-    //   this.workout = data;
-
-    //   data.find(work => {
-    //     if (work.id === workoutEl.dataset.id) {
-    //       localStorage.removeItem('workouts');
-    //       location.reload();
-    //     }
-    //   });
-    // });
+    buttonEdit = document.querySelector('.btn-edit');
   }
 
   // Move map marker on click
@@ -534,10 +461,11 @@ class App {
 
   feature() {
     buttonDelAll.addEventListener('click', this.delete.bind(this));
-    // buttonEdit.addEventListener('click', this.edit.bind(this));
+    buttonEdit.addEventListener('click', this.edit.bind(this));
   }
 
   edit() {
+    this._loadMap.bind(this);
     this._renderingForm();
   }
 
