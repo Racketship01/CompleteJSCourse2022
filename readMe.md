@@ -6839,6 +6839,291 @@ javascriptIsFun = "YES!";
     - second part, the job of IP protocol is to actually send and route these packets through the internet.
     - It ensures that they arrive at the correct destination using IP address on each packet
 
+- Welcome to Callback Hell
+  ```js
+  // Callback Hell --nested callback (function inside function) in order to execute asynch tasks in sequence. This happens for all asynch task handled by callbacks not just AJAX calls --easily identify by the triangular shape form in vscode
+  setTimeout(() => {
+    console.log("1 second passed");
+    setTimeout(() => {
+      console.log("2 seconds passed");
+      setTimeout(() => {
+        console.log("3 seconds passed");
+        setTimeout(() => {
+          console.log("4 seconds passed");
+        }, 1000);
+      }, 1000);
+    }, 1000);
+  }, 1000);
+  // NOTE:  bad code, because it will have more bugs, because the harder it is to understand code and to reason about the code, the more difficult it will be to add new features and to add more functionality to the application. -- SOLUTION FOR CALLBACK HELL -> PROMISES
+  ```
+- Promises and Fetch API
+  ![](./img/promise.png)
+
+  - container or a placeholder for a future value, and the perfect example of a future value is the response coming from an AJAX call. So when we start the AJAX call, there is no value yet, but we know that there will be some value in the future.
+  - The promise object represents the eventual completion (or a failure) of an asynch operation and its resuting
+    ![](./img/promise1.png)
+  - since promises work with asynchronous operations, they are time sensitive. So they change over time. And so promises can be in different states and this is what they call the cycle of a promise.
+  - different states (FULFILLED or REJECTED) are very important to understand because when we use promises in our code, we will be able to handle these different states in order to do something as a result of either a successful promise or a rejected one.
+  - important thing about promises is that a promise is only settled once. And so from there, the state will remain unchanged forever. So the promise was either fulfilled or rejected, but it's impossible to change that state.
+  - different states are relevant and useful when using promise to get a result so called consume a promise --promise that was returned from the fetch function --but need promise to be exist by first building it br created in the case of fetch API
+
+- Consuming Promises
+
+  ```js
+  const request = fetch("https://restcountries.com/v2/name/philippines");
+  // console.log(request); // return a promise (pending promise)
+
+  // Consuming Promises
+  // const getCountryData = function (country) {
+  //   fetch(`https://restcountries.com/v2/name/${country}`)
+  //     .then(function (response) {
+  //       console.log(response);
+
+  //       return response.json(); // JSON is a method that is available on all the response objects that is coming from the fetch function, so all of the resolved values, NOTE: json is also asynch function and will return a new promise --thats why we need another then method
+  //     })
+  //     .then(function (data) {
+  //       console.log(data);
+  //       renderCountryData(data[0]);
+  //     }); // fetch will return a promise --assumed fulfilled state we can use the then method that available on all promises --argument in the callback function at then method is the resulting value of the fulfilled promise
+  // }; -->
+
+  const getCountryData = function (country) {
+    fetch(`https://restcountries.com/v2/name/${country}`)
+      .then((response) => response.json())
+      .then((data) => renderCountryData(data[0]));
+  };
+  getCountryData("philippines");
+  ```
+
+  - Promises do not get rid of callbacks, but they do in fact get rid of callback hell
+
+- Chaining Promises
+
+  ```js
+  // Chaining Promises
+  const getCountryData = function (country) {
+    // Country 1
+    fetch(`https://restcountries.com/v2/name/${country}`)
+      .then((response) => response.json())
+      .then((data) => {
+        renderCountryData(data[0]);
+        const neighbour = data[0].borders?.[0];
+        if (!neighbour) return;
+
+        // Country 2
+        fetch(`https://restcountries.com/v2/alpha/${neighbour}`) // then method will always returns a promise no matter if we actually return it or not. But if we do return a value, that value will become the fulfillment value of the next then method --the fulfilled value of the promise wil become the body
+          .then((response) => response.json())
+          .then((data) => renderCountryData(data, "neighbour"));
+      });
+    // always return to promise and then handle it outside by simply continuing the chain
+  };
+  getCountryData("philippines");
+  getCountryData("portugal");
+  ```
+
+- Handling Rejected Promises (handling error is also called CATCHING ERROR)
+
+  - 2 ways handling rejections (no internet connection)
+    - 1st: Handled the error by displaying alert window --pass a second callback function into the then method at the first fetch call. (first callback function is always gonna be called for the fulfilled promise, for successful one)
+    ```js
+    fetch(`https://restcountries.com/v2/name/${country}`).then(
+      (response) => response.json(),
+      (err) => alert(err)
+    );
+    ```
+    - 2nd: using catch method at the end of the chain to cathc the error at any then method
+
+  ```js
+  // Country 2
+      return fetch(`https://restcountries.com/v2/alpha/${neighbour}`) // then method will always returns a promise no matter if we actually return it or not. But if we do return a value, that value will become the fulfillment value of the next then method --the fulfilled value of the promise wil become the body
+        .then(response => response.json())
+        .then(data => renderCountryData(data, 'neighbour'));
+    })
+    .catch(err => {
+      console.error(`${err} 💥💥💥`);
+      renderError(`Something went wrong 💥💥 ${err.message}.Try again!`); // error generated here is a real JS object --we can create errors in JS with a constructor like map or set.
+    }) // catch method also returns a promise --can also be chain
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
+    }); // finally method called whatever happens to the promise either fulfilled or rejected is always be called
+  // always return to promise and then handle it outside by simply continuing the chain
+
+  //  NOTE: fetch promise only rejects when there is no internet connection --with the real error of 404 the fetch promise will still get fulfilled so there's no rejection that catch handler can pick
+  };
+  ```
+
+- Throwing Errors Manually
+
+  ```js
+  const getJSON = function (url, errorMsg = "Something went wrong") {
+    return fetch(url).then((response) => {
+      if (!response.ok) {
+        throw new Error(`${errorMsg} (${response.status})`);
+      }// throw --will immediately terminiate current function just like return does
+    } // the effect of creating and throwing an error in any of these then method is that the promise will immediately reject --the return rejected promise will be propogate down to the catch handler
+    return response.json();
+    });
+  };
+
+  const getCountryData = function (country) {
+    // Country 1
+    getJSON(`https://restcountries.com/v2/name/${country}`, "Country not found")
+      .then((data) => {
+        // console.log(data);
+        renderCountryData(data[0]);
+        const neighbour = data[0].borders?.[0];
+        if (!neighbour) throw new Error("No neighbour found!");
+        // if (!neighbour) return;
+
+        // Country 2
+        return getJSON(
+          `https://restcountries.com/v2/alpha/${neighbour}`,
+          " Country not found"
+        ).then((data) => renderCountryData(data, "neighbour"));
+      })
+      .catch((err) => {
+        console.error(`${err} 💥💥💥`);
+        renderError(`Something went wrong 💥💥 ${err.message}.Try again!`);
+      })
+      .finally(() => {
+        countriesContainer.style.opacity = 1;
+      });
+  };
+
+
+  btn.addEventListener("click", function () {
+    getCountryData("portugal");
+  });
+
+  // Throwing Errors Manually
+  getCountryData("philippines");
+  // NOTE: whenever we want to create some error that we want to handle down here, in the catch handler, all we need to do is to throw, and create a new error
+  ```
+
+- Asynchronous Behind the scenes: The Event Loop
+
+  - Review
+    ![](./img/asynchBehind.png)
+
+    - Event Loop --is the essential piece that makes asynch behavior possible in JS --reason why we have non blocking concurrency model in JS
+    - Concurrency Model --how JS handles multiple tasks happening at the same time
+
+    ![](./img/asynchBehind1.png)
+
+    - In practice, this means to register this callback in the web APIs environment, exactly where the image is loading. And to callback will stay there until the load event is emitted.
+
+    ![](./img/asynchBehind2.png)
+
+    - asynch fetch operation will happen in the Web API environment --because otherwise would be blocking the call stack and create a huge lag in app
+
+    ![](./img/asynchBehind3.png)
+
+    - we use the then method on the promise returned by the fetch function and also register a callback in the web API so that we can react to the future resolved value of the promise (fullfilled) --callback in then method is associated with a promise that is fetching the data from the API.
+
+    ![](./img/asynchBehind4.png)
+
+    - after the image has finished loading, the load event is emmitted on that image. Next, the callback for dis event is put into callback queue --is basically the ordered list of all the callback functions that are in line to be executed. (Now addEventListener did not put the callback directly in the callback queue. It simply registered the callback, which then kept waiting in the web APIs environment until the load event was fired off. Only then the environment put the call back into queue.)
+
+    ![](./img/asynchBehind5.png)
+
+    - Event Loop --looks into the call stack and determines whether its empty or not except for the global context. Coordination between the call stack and to callbacks in the callback queue. So, the event loop is basically who decides exactly when each callback is executed. Event loop tick --each time event loop takes a callback from the callback queue to call stack
+
+    - NOTE:
+
+      - everything related to the DOM is not part of the JS but in web APIs --and so its in the web APIs environment where the asynch task related to the DOM will run.
+      - asynch task will all run in the Web API envirionmen of the browser
+      - the web APIs environment, the callback queue and the event loop, all together, make it possible that asynchronous code can be executed in a non blocking way even with only one thread of execution in the engine
+
+      ![](./img/asynchBehind6.png)
+
+      - Fetch and Promises --callbacks related to the promises do actually not go into the callback queue instead have a special queue called **microtasks queue** --basically has a priority over the callback queue. So, at the end of an event loop tick, so after a callback has been taken from the callback queue, the event loop will check if there are any callbacks in the microtasks queue. And if there are, it will run all of them before it will run any more callbacks from the regular callback queue.
+
+    - ![](./img/asynchBehind7.png)
+      - In practice, this means that microtasks can basically cut in line before all other regular callbacks. Now, if one microtask adds a new microtask then that new microtask is also executed before any callbacks from the callback queue. And this means that the microtasks queue can essentially starve the callback queue.
+
+- The Event Loop in Practice
+
+  ```js
+  // Event Loop
+
+  // 1
+  console.log("Test start");
+
+  // 4
+  setTimeout(() => console.log("0 sec timer"), 0);
+
+  // 3
+  Promise.resolve("Resolved Promise 1").then((res) => console.log(res)); // allows us to build a promise --create a promise that is immediately has a success value(fulfilled) --this will executed first before timer because of microtasks queue
+
+  Promise.resolve("Resolved Promise 2").then((res) => {
+    for (let i = 0; i < 1000000000; i++) {}
+    console.log(res);
+  });
+
+  // 2
+  console.log("Test end");
+
+  // NOTE: --code outside any callback will run first --Both timer and a promise will finish at the same time
+  ```
+
+- Building Simple Promise
+
+  - Promise --are essentially just a special kind of object in JS
+  - The promise constructor only takes one argument so-called executor function.
+
+  - NOTE: in practice, most of the time all we actually do is to consume promises. And we usually only built promises to basically wrap old callback based functions into promises. And this is a process that we call promisifying --means to convert callback based asynch behavior into promise based
+
+  ```js
+  // Building Simple Promise
+
+  const lotteryPromise = new Promise(function (resolve, reject) {
+    console.log("Lottery draw is happening!");
+    setTimeout(function () {
+      if (Math.random() >= 0.5) {
+        resolve("You WIN!");
+      } else {
+        reject(new Error("You LOST!"));
+      }
+    }, 2000);
+  }); // the executor function has two argument function of resolve and reject
+
+  lotteryPromise
+    .then((res) => console.log(res))
+    .catch((err) => console.error(err));
+
+  // Promisifying setTimeout
+  const wait = function (secs) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, secs * 1000);
+    });
+  };
+  wait(1)
+    .then(() => {
+      console.log("1 second passed");
+      return wait(1);
+    })
+    .then(() => {
+      console.log("2 seconds passed");
+      return wait(1);
+    })
+    .then(() => {
+      console.log("3 seconds passed");
+      return wait(1);
+    })
+    .then(() => {
+      console.log("4 seconds passed");
+      return wait(1);
+    })
+    .then(() => console.log("5 seconds passed"));
+
+  // Static method of Promise Constructor
+  Promise.resolve("Resolved Promise 1").then((res) => console.log(res));
+
+  Promise.reject(new Error("Rejected Promise 1")).catch((res) =>
+    console.error(res)
+  );
+  ```
+
 ## Section 17: Modern JS Development: Modules, Tooling and Function
 
 ## Section 18: Forkify App: Building a Modern Application
