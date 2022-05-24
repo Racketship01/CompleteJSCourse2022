@@ -6870,6 +6870,29 @@ javascriptIsFun = "YES!";
 - Consuming Promises
 
   ```js
+  const renderCountryData = function (data, className = "") {
+    const html = ` <article class="country ${className}" >
+  <img class="country__img" src="${data.flag}" />
+  <div class="country__data">
+      <h3 class="country__name">${data.name}</h3>
+      <h4 class="country__region">${data.region}</h4>
+      <p class="country__row"><span>👫 </span>${(
+        +data.population / 1000000
+      ).toFixed(2)}</p>
+      <p class="country__row"><span>🗣️ </span>${data.languages[0].name}</p>
+      <p class="country__row"><span>💰 </span>${data.currencies[0].name}</p>
+  </div>
+  </article>`;
+
+    countriesContainer.insertAdjacentHTML("beforeend", html);
+    // countriesContainer.style.opacity = 1;
+  };
+
+  const renderError = function (msg) {
+    countriesContainer.insertAdjacentText("beforeend", msg);
+    // countriesContainer.style.opacity = 1;
+  };
+
   const request = fetch("https://restcountries.com/v2/name/philippines");
   // console.log(request); // return a promise (pending promise)
 
@@ -7033,6 +7056,7 @@ javascriptIsFun = "YES!";
       - everything related to the DOM is not part of the JS but in web APIs --and so its in the web APIs environment where the asynch task related to the DOM will run.
       - asynch task will all run in the Web API envirionmen of the browser
       - the web APIs environment, the callback queue and the event loop, all together, make it possible that asynchronous code can be executed in a non blocking way even with only one thread of execution in the engine
+      - **DOM manipulation** is synchronous, however, the browser's re-rendering of the page in response to a DOM update is asynchronous. This can give the illusion of an asynchronous DOM update.
 
       ![](./img/asynchBehind6.png)
 
@@ -7123,6 +7147,445 @@ javascriptIsFun = "YES!";
     console.error(res)
   );
   ```
+
+- Promisifying the Geolocation API
+
+  ```js
+  // Promisifying the Geolocation API
+  // navigator.geolocation.getCurrentPosition(
+  //   position => console.log(position),
+  //   err => console.error(err)
+  // );
+
+  const getPositon = function () {
+    return new Promise(function (resolve, reject) {
+      // navigator.geolocation.getCurrentPosition(
+      //   position => resolve(position),
+      //   err => reject(err)
+
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
+  };
+  // getPositon().then(pos => console.log(pos));
+
+  const whereAmI = function () {
+    getPositon()
+      .then((pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+
+        return fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+      })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error(`Problem! Geocoding not found(${response.status})`);
+        }
+        //  console.log(response);
+        return response.json();
+      })
+      .then(function (data) {
+        console.log(data);
+        console.log(`You are in ${data.city}, ${data.country}`);
+
+        return fetch(`https://restcountries.com/v2/name/${data.country}`);
+      })
+      .then((response) => {
+        console.log(response);
+        if (!response.ok)
+          throw new Error(`No country found! (${response.status})`);
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        renderCountryData(data[0]);
+      })
+      .catch((err) => {
+        console.error(`${err.message} 💥💥💥`);
+      })
+      .finally(() => {
+        countriesContainer.style.opacity = 1;
+      });
+  };
+
+  btn.addEventListener("click", whereAmI);
+  ```
+
+  ```js
+  // --Promisifying source attribute of an image in asynchronously
+  const images = document.querySelector(".images");
+
+  const createImage = function (imgPath) {
+    return new Promise(function (resolve, reject) {
+      const img = document.createElement("img");
+      img.src = imgPath;
+
+      img.addEventListener("load", function () {
+        images.append(img);
+        resolve(img);
+      });
+
+      img.addEventListener("error", function () {
+        reject(new Error("Image is not found"));
+      });
+    });
+  };
+
+  const wait = function (secs) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, secs * 1000);
+    });
+  };
+
+  let currentImg;
+
+  createImage("img/img-1.jpg")
+    .then((res) => {
+      console.log("Image 1 loaded");
+      currentImg = res;
+      return wait(2);
+    })
+    .then(() => {
+      currentImg.style.display = "none";
+
+      return createImage("img/img-2.jpg");
+    })
+    .then((img) => {
+      console.log("Image 2 loaded");
+      currentImg = img;
+      return wait(2);
+    })
+    .then(() => {
+      currentImg.style.display = "none";
+
+      return createImage("img/img-3.jpg");
+    })
+    .then((img) => {
+      console.log("Image 3 loaded");
+      currentImg = img;
+      return wait(2);
+    })
+    .then(() => {
+      currentImg.style.display = "none";
+    })
+    .catch((err) => console.error(`${err.message}  💥💥💥`));
+  ```
+
+- Consuming Promises with Async/Await
+
+  - NOTE:
+
+    - async function keep running in the background while performing the code inside of it --when done automatically returns a promise.
+    - inside async function, we can have one or more await statements
+    - await will stop the code execution at this point of the function until the promise is fulfilled. And so until the data has been fetched in this case, but now after that explanation, you might think isn't stopping the code, blocking the execution? NO, single await doesnt block the call stack, it makes our code look like regular sync code while behind the scenes it is async
+    - Using async and await looks like a sync code, we can simply await until the value of the promise is returned
+    - Async and await is only a syntactic sugar over the then method in promises -- it's a bit like classes in JavaScript, which also hides the true nature of how things work behind the scenes.
+
+    ```js
+    // Consuming Promises with Async/Await
+    const getPositon = function () {
+      return new Promise(function (resolve, reject) {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+    };
+
+    const whereAmI = async function () {
+      // Geolocation
+      const position = await getPositon();
+      const { latitude: lat, longitude: lng } = position.coords;
+
+      // Reverse Geocoding
+      const resGeo = await fetch(
+        `https://geocode.xyz/${lat},${lng}?geoit=json`
+      );
+      const dataGeo = await resGeo.json();
+      console.log(dataGeo);
+
+      // Country Data
+      // fetch(`https://restcountries.com/v2/name/${country}`).then(res => console.log(res)); --is the same as below
+      const response = await fetch(
+        `https://restcountries.com/v2/name/${dataGeo.country}`
+      ); // using await we can wait for the result of the promise --wait will stop execution at this point until promise is fulfilled --as soon as the promise resolved, it will be the value of the await expression
+      console.log(response);
+      const data = await response.json(); // same as before, no need then method for the new promise of json method
+      console.log(data);
+      renderCountryData(data[0]);
+    };
+    whereAmI();
+    // console.log('FIRST');
+    ```
+
+- Error Handling With Try & Catch
+
+  - try catch statement is actually used in regular JS as well --but can also used to catch errors in async function
+  - Fetch promise does not reject on a 404 error or on a 403 error. Only internet connection error fetch promises can catch. Solution: manually create error
+
+  ```js
+  // try {
+  //   let y = 1;
+  //   const x = 2;
+  //   y = 3;
+  // } catch (err) {
+  //   alert(err.message);
+  // }
+  // Error Handling With Try & Catch
+  const getPositon = function () {
+    return new Promise(function (resolve, reject) {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
+  };
+
+  const whereAmI = async function () {
+    try {
+      // Geolocation
+      const position = await getPositon();
+      const { latitude: lat, longitude: lng } = position.coords; // we dont need to throw manual error here because in case something went wrong with Geolocation, we already built promise that auto rejects and eventual get that error at the catch block
+
+      // Reverse Geocoding
+      const resGeo = await fetch(
+        `https://geocode.xyz/${lat},${lng}?geoit=json`
+      );
+      if (!resGeo.ok) throw new Error("Problem getting location data");
+      const dataGeo = await resGeo.json();
+      console.log(dataGeo);
+
+      // Country Data
+      const response = await fetch(
+        `https://restcountries.com/v2/name/${dataGeo.country}`
+      );
+      if (!response.ok) throw new Error("Problem getting country data");
+      console.log(response);
+      const data = await response.json();
+      console.log(data);
+      renderCountryData(data[0]);
+    } catch (err) {
+      console.error(`${err}💥💥💥`);
+      renderError(`Something went wrong! 💥 ${err.message}`);
+    }
+  };
+  whereAmI();
+  ```
+
+- Returning values from Async Functions
+
+  ```js
+  const whereAmI = async function () {
+    try {
+      // Geolocation
+      const position = await getPositon();
+      const { latitude: lat, longitude: lng } = position.coords; // we dont need to throw manual error here because in case something went wrong with Geolocation, we already built promise that auto rejects and eventual get that error at the catch block
+
+      // Reverse Geocoding
+      const resGeo = await fetch(
+        `https://geocode.xyz/${lat},${lng}?geoit=json`
+      );
+      if (!resGeo.ok) throw new Error("Problem getting location data");
+      const dataGeo = await resGeo.json();
+      console.log(dataGeo);
+
+      // Country Data
+      const response = await fetch(
+        `https://restcountries.com/v2/name/${dataGeo.country}`
+      );
+      if (!response.ok) throw new Error("Problem getting country data");
+      console.log(response);
+      const data = await response.json();
+      console.log(data);
+      renderCountryData(data[0]);
+
+      // Returning values from Async Functions --the value that we return by the async function will become the fulfilled value of promise
+      return `You are in ${dataGeo.city}, ${dataGeo.country}`;
+    } catch (err) {
+      console.error(`${err}💥💥💥`);
+      renderError(`Something went wrong! 💥 ${err.message}`);
+
+      // Reject promise returned from async function
+      // rethrowing error basically throw error again to propagate it down in the catch
+      throw err;
+    }
+  };
+  console.log("1: Will get location");
+
+  // whereAmI()
+  //   .then(res => console.log(`2: ${res}`))
+  //   .catch(err => console.error(`2: ${err.message}`))
+  //   .finally(() => console.log('3: Finished getting location')); // can use then metod to get the fulfilled value of the promise
+
+  // use IIFE for the async function
+  (async function () {
+    try {
+      const country = await whereAmI();
+      console.log(`2: ${country}`);
+    } catch (err) {
+      console.error(`2: ${err.message}`);
+    }
+    console.log("3: Finished getting location");
+  })();
+  ```
+
+- Running Promises in Parallel
+
+  ```js
+  // Running Promises in Parallel
+  const get3Countries = async function (c1, c2, c3) {
+    try {
+      // const [data1] = await getJSON(`https://restcountries.com/v2/name/${c1}`);
+      // const [data2] = await getJSON(`https://restcountries.com/v2/name/${c2}`);
+      // const [data3] = await getJSON(`https://restcountries.com/v2/name/${c3}`);
+      // console.log([data1.capital, data2.capital, data3.capital]);
+
+      // Combinator function --allows to combine multiple promises
+      const data = await Promise.all([
+        getJSON(`https://restcountries.com/v2/name/${c1}`),
+        getJSON(`https://restcountries.com/v2/name/${c2}`),
+        getJSON(`https://restcountries.com/v2/name/${c3}`),
+      ]); // this will return a new promise --a promise that runs all these promises at the same time NOTE: if one of the promises rejects then the whole promises will be rejects as well (Promise.all will short circuit if one promises rejects)
+      console.log(data.map((d) => d[0].capital));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  get3Countries("philippines", "thailand", "mexico");
+
+  // NOTE: whenever you have a situation in which you need to do multiple asynchronous operations at the same time, and operations that don't depend on one another, then you should always, always run them in parallel, just like we did here using promise.all.
+  ```
+
+- Other Promise Combinators: race, allSettled and any
+
+  ```js
+  // Other Promise Combinators
+
+  // Promise.race --receives an array of promises and it also returns a promise (one result) --settled(value is available but doesnt matter if the promise got rejected or fulfilled) as soon as one of the input promises settles --the first settled promise wins the race(either fulfilled or reject)
+  (async function () {
+    const res = await Promise.race([
+      getJSON(`https://restcountries.com/v2/name/philippines`),
+      getJSON(`https://restcountries.com/v2/name/thailand`),
+      getJSON(`https://restcountries.com/v2/name/mexico`),
+    ]);
+    console.log(res[0]);
+  })(); // KIM: Promise.race --we only get one result and not an array of the results of all the three
+  // in the real world Promise.race is actually very useful to prevent against never ending promises or also very long running promises.
+
+  const timeout = function (sec) {
+    return new Promise(function (_, reject) {
+      setTimeout(function () {
+        reject(new Error("Request took too long!"));
+      }, sec * 1000);
+    });
+  };
+  Promise.race([getJSON(`https://restcountries.com/v2/name/japan`), timeout(1)])
+    .then((res) => console.log(res[0]))
+    .catch((err) => console.error(err));
+
+  // Promise.allSettled --takes an array of promises and will simply return an array of all the settled promises --no matter if the promises got rejected or not.
+  // similar to Promise.all in regard that it also returns an array of all the results, but the difference is that Promise.all will short circuit as soon as one promise rejects, but Promise.allSettled, simply never short circuits. So it will simply return all the results of all the promises.
+  Promise.allSettled([
+    Promise.resolve("Success"),
+    Promise.reject("ERROR"),
+    Promise.resolve("Another Success"),
+  ]).then((res) => console.log(res));
+
+  Promise.all([
+    Promise.resolve("Success"),
+    Promise.reject("ERROR"),
+    Promise.resolve("Another Success"),
+  ])
+    .then((res) => console.log(res))
+    .catch((err) => console.error(err));
+
+  // Promise.any [ES2021] -- takes in an array of multiple promises and this one will then return the first fulfilled promise and it will simply ignore rejected promises. --similar with Promise.race but with the difference that rejected promises are ignored
+  Promise.any([
+    Promise.resolve("Success"),
+    Promise.reject("ERROR"),
+    Promise.resolve("Another Success"),
+  ])
+    .then((res) => console.log(res))
+    .catch((err) => console.error(err));
+  ```
+
+- Challenge
+
+```js
+// Challenge 03
+// Part 1
+const images = document.querySelector(".images");
+
+const createImage = function (imgPath) {
+  return new Promise(function (resolve, reject) {
+    const img = document.createElement("img");
+    img.src = imgPath;
+
+    img.addEventListener("load", function () {
+      images.append(img);
+      resolve(img);
+    });
+
+    img.addEventListener("error", function () {
+      reject(new Error("Image is not found"));
+    });
+  });
+};
+
+const wait = function (secs) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, secs * 1000);
+  });
+};
+
+let currentImg;
+
+const loadNPause = async function () {
+  try {
+    const img1 = await createImage("img/img-1.jpg");
+    console.log(`Loaded 1`);
+    currentImg = img1;
+    await wait(2); // wait function does resolved value, no need to save as variable
+    currentImg.style.display = "none";
+
+    const img2 = await createImage("img/img-2.jpg");
+    console.log(`Loaded 2`);
+    currentImg = img2;
+    await wait(2);
+    currentImg.style.display = "none";
+
+    const img3 = await createImage("img/img-3.jpg");
+    console.log(`Loaded 3`);
+    currentImg = img3;
+    await wait(2);
+    currentImg.style.display = "none";
+  } catch (err) {
+    console.error(`${err.message}  💥💥💥`);
+  }
+};
+// loadNPause();
+
+// Part 2
+// const loadAll = async function (img1, img2, img3) {
+//   try {
+//     const imgArr = await Promise.allSettled(
+//       [createImage(img1), createImage(img2), createImage(img3)],
+//       wait(2)
+//     );
+//     console.log(imgArr.map(imgs => imgs));
+//   } catch (err) {
+//     console.error(`${err.message}  💥💥💥`);
+//   }
+// };
+
+const loadAll = async function (imgArr) {
+  try {
+    const imgs = imgArr.map(async (img) => await createImage(img)); // createImage() returns a promise and we should await otherwise nothing will happen--we can use async and await -- and we can run the promises in parallel and use promise combinator
+    console.log(imgs); // array of promises not images themselves
+
+    // NOTE: once you need to use async await in a map method like this, which believe me is pretty common, then you end up with an array of promises that you can then as a next step handle like this.
+    const image = await Promise.all(imgs); //get image elements themselves out of the promise? --awaits using promise combinator
+    console.log(image);
+    image.forEach((img) => img.classList.add("parallel"));
+  } catch (err) {
+    console.error(`${err.message}  💥💥💥`);
+  }
+};
+
+loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
+```
 
 ## Section 17: Modern JS Development: Modules, Tooling and Function
 
