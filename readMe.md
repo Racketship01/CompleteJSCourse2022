@@ -7572,7 +7572,7 @@ const loadNPause = async function () {
 
 const loadAll = async function (imgArr) {
   try {
-    const imgs = imgArr.map(async (img) => await createImage(img)); // createImage() returns a promise and we should await otherwise nothing will happen--we can use async and await -- and we can run the promises in parallel and use promise combinator
+    const imgs = imgArr.map(async (img) => await createImage(img)); // createImage() returns a promise and we should await otherwise nothing will happen--we can use async and await -- and we can run array of promises in parallel and use promise combinator
     console.log(imgs); // array of promises not images themselves
 
     // NOTE: once you need to use async await in a map method like this, which believe me is pretty common, then you end up with an array of promises that you can then as a next step handle like this.
@@ -7588,6 +7588,190 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
 ```
 
 ## Section 17: Modern JS Development: Modules, Tooling and Function
+
+- An overview of Modern JS Development
+  ![](./img/modernJSdev.png)
+
+  - Development
+    - Modules(packages)
+      - can share data between them and make code more organized and maintainable --can also include 3rd party modules
+      - NPM (Node Package Manager) --established itself as the go to repository for all kinds of packages in Modern JS development --both repository in which packages live and a program that we use on our computers to install and manage these packages
+    - Build Process
+      - after development, our proj will go through build process (one big final JS bundle is built --final file) that will be deploy to web server for production --js file that will be sent to browsers in production
+      - Steps
+        - 1 **BUNDLING**: bundle all our modules together into one big file --pretty complex process that will eliminate unused code and compress code --problem1: older browser dont support modules at all --problem2: for better performance, sending less files to the browser
+        - 2 **TRANSPILING & POLYFILLING**: convert all modern JS syntax and features back to old ES5 syntax --usally done using a tool called **babel**
+        - NOTE: we dont perform these steps instead we use a special tool to implement this build process for us --most common build tools available are **webpack and parcel** as they take our raw code and transform it into a JS bundle --these dev tools are also available on NPM
+          - webpack --more popular but hard and confusing to setup as a lot of stuff need to configure manually
+          - parcel --has a zero configuration bundler so in this bundler dont need to write any set up code
+    - Production
+      - production means that the application is being used by real users in the real world
+
+- An Overview of Modules in JS
+
+  - Module
+    - contains some code that can also have imports and exports
+      ![](./img/module.png)
+      ![](./img/module1.png)
+      - Export (public API) --export values out of a module e.g simple values or entire function and whatever we export from a module is called **public API** --public API is actually consumed by importing values into a module
+      - Import (dependency) -modules from which we import are then called dependencies --importing from external module
+  - Native JS (ES6) Modules
+    - before ES6, modules need to implement manually or use external libraries
+    - NOTE:
+      ![](./img/module2.png)
+      - in ES6 --top level variables are private to the module by default --the only way to access these variables thats inside the module is by exporting that value
+      - in scripts --all top level variables are always global that can lead to problems like global namespace pollution where multiple scripts try to declare variables with the same name and then these variable eventually collide --best solution? private variables
+    - How ES6 modules imported
+      ![](./img/module2.png)
+      - remember that parsing basically means to just read the code, but without executing it. And this is the moment in which imports are hoisted. And in fact, the whole process of importing modules happens before the code in the main module is actually executed.
+      - if we were allowed to import a module inside of a function, then that function would first have to be executed before the import code happened. And so in that case, modules could not be imported in a synchronous way. So the importing module would have to be executed first.
+      - why do we actually want modules to be loaded in a synchronous way? Isn't synchronous bad? Well, the answer is that this is the easiest way in which we can do things like bundling and dead code elimination. So basically deleting code that's actually not even necessary.
+      - after parsing process figured out modules need to be import, these modules will be downloaded from the server --downloading happens in asynchronous way
+      - exported values are not copied to imports. Instead, the import is basically just a reference to the export at value like a pointer. --when the value changes in the exporting module, then the same value also changes in the importing module
+
+- Exporting and Importing in ES6 Modules
+
+  ```js
+  // Importing module
+
+  // Name Import
+  // import { addToCart, totalPrice as price, tq } from './shoppingCart.js';
+  // addToCart('bread', 5);
+  // console.log(price, tq);
+
+  console.log("Importing module");
+
+  // import * as ShoppingCart from './shoppingCart.js'; // * --everything
+  // ShoppingCart.addToCart('bread', 5);
+  // console.log(ShoppingCart.totalPrice);
+
+  // Importing Default Export --can give any name
+  import add from "./shoppingCart.js";
+  add("pizza", 8);
+  // NOTE: not advisable to import module twice
+
+  // Mix Name and Default Exports
+  // import added, { addToCart, totalPrice as price, tq } from './shoppingCart.js';
+  // added('pasta', 5);
+  // NOTE: never mix this both in the same module --preferred style is just one default export per module then import that here (main module)
+
+  // Import is a life connection to exports --import is not simply copy of the value exported
+  import added, { cart } from "./shoppingCart.js";
+  added("pasta", 5);
+  added("salad", 9);
+  added("gelato", 7);
+
+  console.log(cart);
+  ```
+
+  ```js
+  // Exporting module
+  // shoppingCart.js
+
+  // Name Export
+  console.log("Exporting module"); // cart modules will be executed first at the importing module
+
+  const shoppingCart = 10;
+  export const cart = [];
+
+  export const addToCart = function (product, quantity) {
+    cart.push({ product, quantity });
+    console.log(`${quantity} ${product} added to cart`);
+  };
+
+  const totalPrice = 286;
+  const totalQuantity = 73;
+  export { totalPrice, totalQuantity as tq };
+
+  // Default Exports --when we only want to export one thing per module. if we want to export the same function we would simply export the value itself not the variable
+  export default function (product, quantity) {
+    cart.push({ product, quantity });
+    console.log(`${quantity} ${product} added to cart`);
+  }
+  ```
+
+- Top Level Await (ES2022)
+
+  - In ES2022, we can use await keyword outside of async function at least in the module
+
+  ```js
+  // TOP-LEVEL AWAIT --blocks the execution of the entire module
+
+  // console.log('Start fetching');
+  // const res = await fetch('https://jsonplaceholder.typicode.com/posts');
+  // const data = await res.json();
+  // console.log(data);
+  // console.log('End Fetching');
+
+  const getLastPost = async function () {
+    const res = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const data = await res.json();
+    //   console.log(data);
+
+    return { title: data.at(-1).title, text: data.at(-1).body }; // using .at(-1) basically getting the last array
+  };
+  const lastPost = getLastPost();
+  console.log(lastPost); // result: Pending Promise not object of array we expecting NOTE: Reason: calling async function will always retutn a promise not the return of the actual data itself. Solution: to get the data(object) instead of the promise was to simply use regular promises
+
+  // Not very clean
+  // lastPost.then(last => console.log(last));
+
+  const lastPost2 = await getLastPost();
+  console.log(lastPost2);
+
+  // Importing with blocking code --the importing module (script.js) has to wait for the code exporting module(shoppingCart.js) to finish
+  // one module imports a module that has top level await --importing module wait for the exporting module to finish blocking code
+
+  // NOTE: using top-level await --await outside of any async function will block the entire module
+  ```
+
+  ```js
+  // Blocking code
+  console.log("Start fetching users");
+  await fetch("https://jsonplaceholder.typicode.com/users");
+  console.log("Finish fetching users");
+  ```
+
+- The Module Pattern
+
+  - main goal? is to encapsulate functionality to have private data and to expose a public API --best way by simply using function as this will give a private data by default that can become a public API
+
+  ```js
+  // The module pattern
+  const ShoppingCart2 = (function () {
+    const cart = [];
+    const shippingCost = 10;
+    const totalPrice = 237;
+    const totalQuantity = 23;
+
+    const addToCart = function (product, quantity) {
+      cart.push({ product, quantity });
+      console.log(
+        `${quantity} ${product} added to cart (shipping cost is ${shippingCost})`
+      );
+    }; // We are simply using cart without using this keyword because of closures. So here we could also log something that is indeed private to this module. So something that will not be visible in the exported object (ShoppingCart2).
+    // so in order to produce this string here, the function will also have to use this variable that was only present at its birthplace, but which no longer does exist besides that.
+
+    const orderStock = function (product, quantity) {
+      console.log(`${quantity} ${product} ordered from supplier `);
+    };
+
+    // variable are private as per inside a function --need to return variales in order to basically return a public API
+    return {
+      addToCart,
+      cart,
+      totalPrice,
+      totalQuantity,
+    };
+  })();
+
+  // how do we have access to the cart variable and able to manipulate? how we able to do that even if it called in IIFE and return function long ago? answer: closures --allow a function to have access to all the variables that were present at its birthplace
+  ShoppingCart2.addToCart("apple", 4);
+  ShoppingCart2.addToCart("orange", 8);
+  console.log(ShoppingCart2);
+  console.log(ShoppingCart2.cart);
+  console.log(ShoppingCart2.shippingCost); // undefined --as properties are only private inside module and cannot show in the console --this called implementation of module pattern
+  ```
 
 ## Section 18: Forkify App: Building a Modern Application
 
