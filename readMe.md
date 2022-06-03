@@ -7773,6 +7773,146 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
   console.log(ShoppingCart2.shippingCost); // undefined --as properties are only private inside module and cannot show in the console --this called implementation of module pattern
   ```
 
+- Common JS Modules
+
+  - Besides native modules and module pattern, there are also other module systems in JS in the past --they are not native JS so they relied on some external implementation. E.g: AMD Modules and Common JS Modules
+  - Common JS modules are important because they have been used in node.js --only recently ES Modules have been implemented in node.js --node.js is a way of running JS on web server outside of a browser
+  - Problems is almost all the modules in the npm repository still use the common JS module system.Reason is that npm was originally only intended for node that uses commonJS. Only later npm became the standard repository for the whole JS world.
+  - Just like in ES6 modules, in Common JS one file is one module
+
+  ```js
+  // Common JS modules
+
+  // Export
+  export.addToCart = function (product, quantity) {
+    cart.push({ product, quantity });
+    console.log(
+      `${quantity} ${product} added to cart (shipping cost is ${shippingCost})`
+    );
+  }; //this is not going to woek in the browser but it will work in node.js --export keyword is an object
+
+  // Import
+  const {addToCart} = require('./shoppingCart.js'); // require still not defined in browser environment but defined in node.js because this is part of the commonJS specification
+  ```
+
+- A brief introduction to the Command Line
+
+  - Basic
+    - dir --list of directory
+    - cd -- change directory
+    - ../.. -- move up two levels back to the desktop
+    - cd.. -- move up one levels back to parent folder
+    - clear -- clear terminal
+    - mkdir -- create new folder
+    - type filename.ext -- create new file
+    - del -- delete file
+    - mv -- move
+    - mv filename ../ -- move to parent folder
+    - rmdir -- remove folder (only work in empty directory on mac)
+    - rm -R filename -- another way to remove folder using recursively delete all the files and also the directory itself
+
+- Introduction to NPM (Node Package Manager)
+
+  - both software and a package repository
+  - why need a way on managing packages or dependencies in our project? back in days, used to include external libraries into HTML using script tag just like the leaflet library. It is a huge problem and huge mess for a much larger project as we need to updated all the dependecies manully
+  - package.json -- npm (npm init) created for our project when initialized this file wil store the entire configuration
+  - npm install packagename / npm i packagename -- downloading packages
+  - without module bundler we cant use the packages we've installed
+  - NOTE: packages that uses Common JSmodules system cannot directly import into our code
+  - Lodash --is package that has a collection of useful function for arrays, object, function, dates and more
+  - Its hard to copy nested object that's why we use clone deep module at lodash package
+  - NOTE: If you want to move your project to another computer or in other developer, in all scenarios, you should never ever include the node modules(package) folder because in real project it is really huge as it will slow down the performance as this files (node_modules package) are already at NPM
+  - if I copy my project without the node modules folder, so without the dependencies, will I have to install all of them, one by one? What if I have 20 or 200 dependencies? it comes with a handy by using the package.json --as we delete the folder, we can easily re-installed by using command line npm i w/o any package name and then NPM will reach into your package.json file look all dependencies and install them back
+
+  ```js
+  // Intro to NPM
+
+  // Importing cloneDeep module at lodash-es
+  import cloneDeep from "./node_modules/lodash-es/cloneDeep.js";
+
+  const state = {
+    cart: [
+      { product: "bread", quantity: 5 },
+      { product: "pizza", quantity: 5 },
+    ],
+    user: { loggedIn: true },
+  };
+
+  // Object.assign to copy an object
+  const stateClone = Object.assign({}, state);
+  const stateDeepClone = cloneDeep(state);
+  state.user.loggedIn = false;
+  console.log(stateClone);
+
+  console.log(stateDeepClone);
+  ```
+
+- Bundling with Parcel and NPM Scripts
+
+  - Parcel
+
+    - is a module bundler that bundles modules together and works out of the box w/o configurtion. While webpack is the most popular bundler esp in react world. To install, [npm i parcel --save-dev]
+    - can work will all the commonJS modules
+    - simply, creates a script. And so now we are actually no longer using a module but we are back to using a regular script. --because modules do not work in older browsers
+    - --we can activate something better called hot module replacement --means is that whenever we change one of the modules, it will then trigger a rebuild and that new modified bundle will then automatically get injected into the browser without triggering a whole page reload --helpful for maintaining state on our page whenever are testing rolling
+    - is another command line interface but cannot work if parcel installed locally(showed up package.json) but still can use on the console by using NPX or NPM scripts
+
+  - NOTE:
+
+    - many compiler and bundler need on the root directory to function
+    - whenever we are done developing our project, it time to build the final bundle --bundle that is compressed and has dead code elimination
+    - difference between globally and locally installed packages and especially these tools like Parcel or live server, is that we can use the global tools directly in the command line without the intermediate step of an NPM script. `e.g <npm i parcel -g>`
+    - However, most of these tools actually advise developers to always install the tools locally so that they can always stay on the latest version.
+
+  - dev --is devDependency is like a tool that we need to build application but its not a dependency that we include in our code its simply just a tool.
+  - libraries are simple dependencies while parcel is a dev dependency
+  - NPX
+    - an application built into NPM
+    - aside from bundling, also does exact same job as live-server
+    - the dist folder (distribution) is gonna be the folder that we will send for production, the code in this folder
+  - NPM scripts
+
+    - another way of running a locally installed packages in the command line
+    - allow to automate repetitive tasks
+    - simply create script in package.json
+
+      ```js
+      "scripts": {
+      "start": "parcel index.html", // development --start bundle
+      "build": "parcel build index.html" // build --final bundle
+       },
+
+
+      /////////////////
+
+      // create package.json
+      // npm init
+
+      // install packages
+      // npm i <packagename>
+
+      // install parcel in devDependency
+      // npm i <bundler> --save-d
+
+      //npx --initial bundling
+      // npx parcel index.html
+
+      // 1. node_modules
+      // .\node_modules\.bin\parcel .\index.html
+      ```
+
+- Configuring Babel and Polyfilling
+  - transpile code back to ES5 code
+  - parcel automatically ises babel to transpile our code
+  - babel works with plugins and preset that can be both be configured
+  - plugin --specific JS feature that we want to transpile(convert)
+  - presets --a bunch of plugins bundled together and parcel will use preset that will automatically select which JS feature(plugins) should be compiled based on browser support. Then babel will convert all features so only browser that are barely use anymore wth the market share of less that 0.25% are not going to be supported by the transpiling with the preset
+    - preset-env --this preset does actually only include final features that are already part of the language after passing the 4 stages of the AGMA process
+  - Babel can actually only transpile ES6 Syntax. So data things like arrow functions, classes, const, or the spread operator. So these are basically things that have an equivalent way of writing them in ES5.
+  - New features added in ES6 such as find and promise etc, we can polyfill them
+  - Babel used to do polyfilling out of the box before but recently they started to simply recommending another library
+  - what polyfilling does? recreate defined function and to make it available in the bundle so that the codes can then use it. Even we dont need some code to polyfill, still it will polyfill
+
 ## Section 18: Forkify App: Building a Modern Application
 
 ## Section 19: Setting Up Git and Deployment
