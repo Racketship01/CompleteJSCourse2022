@@ -1262,11 +1262,12 @@ javascriptIsFun = "YES!";
 - What is DOM and DOM Manipulation
 
   - **DOM** (Document Object Model)
+
     - basically a connection point between HTML document and JavaScript code (The DOM represents the document as nodes and objects; that way, programming languages can interact with the page.)
     - automatically created by the browser as soon as the HTML page loads
     - always starts with the document object (right at the very top). And **DOCUMENT** is a special object that have access to in JS. **DOCUMENT** serves as entry point into the DOM
     - Node - Every object located within a document is a node of some kind. In an HTML document, an object can be an element node but also a text node or attribute node.
-      ![](./img/dom.png)
+
       ![](./img/dom1.png)
       ![](./img/dom2.png)
       ![](./img/dom3.png)
@@ -4814,6 +4815,10 @@ javascriptIsFun = "YES!";
 ![](./img/DOMex1.png)
 ![](./img/DOMex2.png)
 
+- NOTE: Difference between node and element --a node is any DOM object. An element is one specific type of node as there are many other types of nodes (text nodes, comment nodes, document nodes, etc...)
+
+![](./img/DOMex3.png)
+
 - How DOM really works (how DOM is organized internally)
 
   - DOM is basically the interface between all JS code and browser or more specificially HTML Documents
@@ -5473,6 +5478,7 @@ javascriptIsFun = "YES!";
 
 - Constructor Functions and the "new" Operator
 
+  - In JavaScript, a constructor gets called when an object is created using the new keyword. The purpose of a constructor is to create a new object and set values for any existing object properties.
   - Constructor functions always start with a capital letter
   - Arrow function will actually not work as a function constructor because it doesnt have its own this keyword. Only function expression and declaration will work
   - The difference between a regular function and constructor function is that we call the constructor using the "new" keyword
@@ -5602,6 +5608,8 @@ javascriptIsFun = "YES!";
   > Classes on JS do not work like traditional classes in other languages like Java or C++
 
   > Classes are special type of functions thats why we have classes declaration and class expression
+
+  > Constructor. The constructor method is a special method for creating and initializing an object created with a class.
 
   ```js
   // ES6 Classes
@@ -7892,7 +7900,7 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
       // npm i <packagename>
 
       // install parcel in devDependency
-      // npm i <bundler> --save-d
+      // npm i <bundler> --save-dev
 
       //npx --initial bundling
       // npx parcel index.html
@@ -7902,8 +7910,9 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
       ```
 
 - Configuring Babel and Polyfilling
+
   - transpile code back to ES5 code
-  - parcel automatically ises babel to transpile our code
+  - parcel automatically uses babel to transpile our code
   - babel works with plugins and preset that can be both be configured
   - plugin --specific JS feature that we want to transpile(convert)
   - presets --a bunch of plugins bundled together and parcel will use preset that will automatically select which JS feature(plugins) should be compiled based on browser support. Then babel will convert all features so only browser that are barely use anymore wth the market share of less that 0.25% are not going to be supported by the transpiling with the preset
@@ -7911,14 +7920,488 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
   - Babel can actually only transpile ES6 Syntax. So data things like arrow functions, classes, const, or the spread operator. So these are basically things that have an equivalent way of writing them in ES5.
   - New features added in ES6 such as find and promise etc, we can polyfill them
   - Babel used to do polyfilling out of the box before but recently they started to simply recommending another library
-  - what polyfilling does? recreate defined function and to make it available in the bundle so that the codes can then use it. Even we dont need some code to polyfill, still it will polyfill
+  - what **polyfilling** does? recreate defined function and to make it available in the bundle so that the codes can then use it. Even we dont need some code to polyfill, still it will polyfill
+
+- Review: Writing Clean and Modern JavaScript
+  ![](./img/cleanCode.png)
+  ![](./img/cleanCode1.png)
+
+  - OOP
+
+    - probably you will still need to at least manipulate some data that's in the class, but for that you should then implement a public API. So basically a couple of methods that can then manipulate that data exactly as you want that to happen.
+
+  - Declarative and Functional JS Principles
+    ![](./img/declarativeCode.png)
+
+    - difference between imperative and declarative is not just some theoretical difference. The declarative is a big and popular programming paradigm being used in functional programming. Using this programming paradigm basically become the modern way of writing code in the modern JS world.
+      ![](./img/declarativeCode1.png)
+
+    - uses <Object.freeze()> method to make an object immutiable --basically only freezes the first level of object not so called deep freeze because we can still change object inside of an object.
+
+- Fixing Bad Code 1 & 2
+
+  - Side effect basically means that something outside of a function is manipulated or that the function does something other than simply returning a value, right? And so a function that has, or that produces side effects is called an impure function. How to fix? Always pass all the data that the function depends on into the function parameter so that it doesnt have to reach(depends) into the outer scope variable. (Then return of those state).
+  - To mutate Object.freeze, need to create a copy and then return that copy of the state
+
+  ```js
+  const budget = Object.freeze([
+    { value: 250, description: "Sold old TV 📺", user: "jonas" },
+    { value: -45, description: "Groceries 🥑", user: "jonas" },
+    { value: 3500, description: "Monthly salary 👩‍💻", user: "jonas" },
+    { value: 300, description: "Freelancing 👩‍💻", user: "jonas" },
+    { value: -1100, description: "New iPhone 📱", user: "jonas" },
+    { value: -20, description: "Candy 🍭", user: "matilda" },
+    { value: -125, description: "Toys 🚂", user: "matilda" },
+    { value: -1800, description: "New Laptop 💻", user: "jonas" },
+  ]);
+  // budget[0].value = 10000; // mutable
+  // budget[9] = 'jonas'; // immutable
+
+  const spendingLimits = Object.freeze({
+    jonas: 1500,
+    matilda: 100,
+  });
+  // spendingLimits.jay = 200;
+
+  const getLimit = (limits, user) => limits?.[user] ?? 0;
+
+  // Pure function
+  const addExpense = function (
+    state,
+    limits,
+    value,
+    description,
+    user = "jonas"
+  ) {
+    // if (!user) user = 'jonas'; // just like setting default parameters
+
+    // avoid data mutation
+    // user = user.toLowerCase();
+    const cleanUser = user.toLowerCase();
+
+    // let lim;
+    // if (spendingLimits[user]) {
+    //   lim = spendingLimits[user];
+    // } else {
+    //   lim = 0;
+    // }
+
+    // using ternary operator
+    // const limit = spendingLimits[user] ? spendingLimits[user] : 0;
+
+    // using optional chaining(?.) and nullish operator (??)
+    // const limit = spendingLimits?.[user] ?? 0;
+
+    // const limit = getLimit(user);
+
+    return value <= getLimit(limits, cleanUser)
+      ? [...state, { value: -value, description, user: cleanUser }]
+      : state; // we use spread operator to create copy of the state object which budget object by returning it. --using turnary operator if the condition is false
+
+    // budget.push({ value: -value, description, user: cleanUser }); // budget.push --cannot use because object is freeze
+  };
+  const newBudget1 = addExpense(budget, spendingLimits, 10, "Pizza 🍕"); // calling add expense function will no longer mutate the budget object --storing in a variable is like using array.push() method
+  console.log(newBudget1);
+
+  const newBudget2 = addExpense(
+    newBudget1,
+    spendingLimits,
+    100,
+    "Going to movies 🍿",
+    "Matilda"
+  );
+  console.log(newBudget2);
+
+  const newBudget3 = addExpense(
+    newBudget2,
+    spendingLimits,
+    200,
+    "Stuff",
+    "Jay"
+  );
+
+  // const checkExpenses = function (state, limits) {
+  //   return state.map(entry =>
+  //     return entry.value < -getLimit(limits, entry.user)
+  //       ? { ...entry, flag: 'Limits' }
+  //       : entry
+  //   );
+  //   // const limit = spendingLimits?.[entry.user] ?? 0;
+  //   // for (const entry of budget)
+  //   //   if (entry.value < -getLimit(limits, entry.user)) entry.flag = 'limit';
+  // };
+  // NOTE: in the map method, whatever returned from the callback will be the element in tha same position of the new array
+
+  // Pure Function
+  const checkExpenses = (state, limits) =>
+    state.map((entry) =>
+      entry.value < -getLimit(limits, entry.user)
+        ? { ...entry, flag: "Limits" }
+        : entry
+    );
+  // const limit = spendingLimits?.[entry.user] ?? 0;
+  // for (const entry of budget)
+  //   if (entry.value < -getLimit(limits, entry.user)) entry.flag = 'limit';
+
+  const finalBudget = checkExpenses(newBudget3, spendingLimits);
+  console.log(finalBudget);
+
+  // Impure Function --doing console.log that create input-output
+  const logBigExpenses = function (state, bigLimit) {
+    // functional version
+    const bigExpense = state
+      .filter((entry) => entry.value <= -bigLimit)
+      .map((entry) => entry.description.slice(-2))
+      .join(" / ");
+    // .reduce((str, cur) => `${str} / ${cur.description.slice(-2)}`, '');
+    console.log(bigExpense);
+
+    // let output = '';
+    // for (let entry of budget)
+    //   output +=
+    //     entry.value <= -bigLimit ? `${entry.description.slice(-2)}  / ` : '';
+
+    // if (entry.value <= -bigLimit) {
+    //   output += `${entry.description.slice(-2)}  / `; // Emojis are count as 2 chars
+    // }
+
+    // output = output.slice(0, -2); // Remove last '/ '
+    // console.log(output);
+  };
+  logBigExpenses(finalBudget, 1000);
+  // console.log(budget);
+
+  // NOTE: in a real world, big functional application, we would use composing to create one function, which will then perform all of these operations at once.
+  // NOTE: we should always pass all the data that we need for a certain function to work right into that function so that it doesnt not depend on any outside data
+  // NOTE: immutability is not just for objects and array but also in regular variable. In funcitonal code never use let variable
+  ```
 
 ## Section 18: Forkify App: Building a Modern Application
 
+- Forkify: Project Overview and Planning
+
+  - Overview:
+    ![](./img/forkify.png)
+
+    - Project Planning (Part 1)
+      ![](./img/forkify1.png)
+
+      ![](./img/forkify2.png)
+
+      ![](./img/forkify3.png)
+
+      ![](./img/forkify4.png)
+
+  - Loading a Recipe from API
+
+    - SASS
+
+      - is a better way of writing CSS which has some nice additional features, which makes writing CSS in a large scale application a lot easier
+      - but browser actually dont understand SASS and so neet to be converted to CSS and here Parcel is going to do that for us
+      - Parcel also capable of converting SASS to CSS
+
+    - Parcel
+      - <npm i parcel@next -D> use to install
+
+    ```js
+    const showRecipe = async function () {
+      try {
+        const response = await fetch(
+          "https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bcc40"
+          //'https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886'
+        );
+
+        const data = await response.json(); // this response object is the return response of the fetch function and then this json method which returns another promise
+
+        if (!response.ok)
+          throw new Error(`${data.message} (${response.status})`);
+        // console.log(response, data);
+
+        let { recipe } = data.data;
+        recipe = {
+          id: recipe.id,
+          title: recipe.title,
+          publisher: recipe.publisher,
+          sourceUrl: recipe.source_url,
+          image: recipe.image_url,
+          servings: recipe.servings,
+          cookingTime: recipe.cooking_time,
+          ingredients: recipe.ingredients,
+        };
+        console.log(recipe);
+      } catch (err) {
+        alert(err);
+      }
+    };
+    showRecipe();
+    ```
+
+- Rendering Recipe
+
+  - Remember: page being displayed in the browser is the html from distribution folder not in the original src code folder --all the images and assets also coming from dist folder e.g icons. To still use the orginal src folder, solution? **Importing**.
+
+- **Forkify Application**
+
+  ```js
+  // import icons from '../img/icons.svg'; // Parcel 1
+  import icons from "url:../img/icons.svg"; // Parcel 2
+  // .. --means to the parent folder
+
+  import "core-js/stable"; // polyfilling to support old browser
+  import "regenerator-runtime/runtime"; // polyfilling async/await
+
+  const recipeContainer = document.querySelector(".recipe");
+
+  // https://forkify-api.herokuapp.com/v2
+
+  ///////////////////////////////////////
+
+  const renderSpinner = function (parentEl) {
+    const markUp = `
+    <div class="spinner">
+      <svg>
+        <use href="${icons}#icon-loader"></use>
+      </svg>
+    </div>
+    `;
+
+    parentEl.innerHTML = "";
+    parentEl.insertAdjacentHTML("afterbegin", markUp);
+  };
+
+  const showRecipe = async function () {
+    try {
+      // Hashchange and Load Event
+      const id = window.location.hash.slice(1); // window.location --basically means the entire URL
+      console.log(id);
+
+      if (!id) return;
+
+      // 1. Loading Recipe
+      renderSpinner(recipeContainer);
+      const response = await fetch(
+        //'https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bcc40'
+        "https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886"
+      );
+
+      const data = await response.json(); // this response object is the return response of the fetch function and then this json method which returns another promise
+
+      if (!response.ok) throw new Error(`${data.message} (${response.status})`);
+      // console.log(response, data);
+
+      let { recipe } = data.data;
+      recipe = {
+        id: recipe.id,
+        title: recipe.title,
+        publisher: recipe.publisher,
+        sourceUrl: recipe.source_url,
+        image: recipe.image_url,
+        servings: recipe.servings,
+        cookingTime: recipe.cooking_time,
+        ingredients: recipe.ingredients,
+      };
+      console.log(recipe);
+
+      // 2. Rendering Recipe
+      const markUp = `
+        <figure class="recipe__fig">
+          <img src="${recipe.image}" alt="${
+        recipe.title
+      }" class="recipe__img" />
+          <h1 class="recipe__title">
+            <span>${recipe.title}</span>
+          </h1>
+        </figure>
+  
+        <div class="recipe__details">
+          <div class="recipe__info">
+            <svg class="recipe__info-icon">
+              <use href="${icons}#icon-clock"></use>
+            </svg>
+            <span class="recipe__info-data recipe__info-data--minutes">${
+              recipe.cookingTime
+            }</span>
+            <span class="recipe__info-text">minutes</span>
+          </div>
+          <div class="recipe__info">
+            <svg class="recipe__info-icon">
+              <use href="${icons}#icon-users"></use>
+            </svg>
+            <span class="recipe__info-data recipe__info-data--people">${
+              recipe.servings
+            }</span>
+            <span class="recipe__info-text">servings</span>
+  
+            <div class="recipe__info-buttons">
+              <button class="btn--tiny btn--increase-servings">
+                <svg>
+                  <use href="${icons}#icon-minus-circle"></use>
+                </svg>
+              </button>
+              <button class="btn--tiny btn--increase-servings">
+                <svg>
+                  <use href="${icons}#icon-plus-circle"></use>
+                </svg>
+              </button>
+            </div>
+          </div>
+  
+          <div class="recipe__user-generated">
+            <svg>
+              <use href="${icons}#icon-user"></use>
+            </svg>
+          </div>
+          <button class="btn--round">
+            <svg class="">
+              <use href="${icons}#icon-bookmark-fill"></use>
+            </svg>
+          </button>
+        </div>
+  
+    <div class="recipe__ingredients">
+      <h2 class="heading--2">Recipe ingredients</h2>
+          <ul class="recipe__ingredient-list">
+            ${recipe.ingredients
+              .map((ing) => {
+                return `<li class="recipe__ingredient">
+    <svg class="recipe__icon">
+    <use href="${icons}#icon-check"></use>
+    </svg>
+    <div class="recipe__quantity">${ing.quantity}</div>
+    <div class="recipe__description">
+    <span class="recipe__unit">${ing.unit}</span>
+    ${ing.description}
+    </div>
+    </li>
+    `;
+              })
+              .join("")}
+          </ul>
+        </div>
+  
+        <div class="recipe__directions">
+          <h2 class="heading--2">How to cook it</h2>
+          <p class="recipe__directions-text">
+            This recipe was carefully designed and tested by
+            <span class="recipe__publisher">${
+              recipe.publisher
+            }</span>. Please check out
+            directions at their website.
+          </p>
+          <a
+            class="btn--small recipe__btn"
+            href="${recipe.sourceUrl}"
+            target="_blank"
+          >
+            <span>Directions</span>
+            <svg class="search__icon">
+              <use href="${icons}#icon-arrow-right"></use>
+            </svg>
+          </a>
+        </div>
+      `;
+      recipeContainer.innerHTML = " ";
+      recipeContainer.insertAdjacentHTML("afterbegin", markUp);
+    } catch (err) {
+      alert(err);
+    }
+  };
+  showRecipe();
+
+  // NOTE:  core-js (--special package use to polyfilling) & regenerator-runtime (intall multiple package) <npm i  core-js regenerator-runtime>
+
+  // Event Listener --Listening for Load and Hashchange Events
+  window.addEventListener("hashchange", showRecipe);
+
+  window.addEventListener("load", showRecipe); // this event fired off immediately after the page has a completed loading
+  // as we open the page, we also want to listen for the load event for the entire page loading
+  ```
+
+- The MVC Architecture
+
+  - Why using Project/Software Architecture?
+    ![](./img/mvc.png)
+
+    - 1st: The archt will give our project the structure in which we can then write the code.**Software structure** --means how we organize and divide the code into different modules, classes and functions.
+    - 2nd: **Maintainability** --always think for future and need to change in order to maintain the project
+    - 3rd: **Expandability** --adding new features
+    - \*The perfect architetcure is the combination of these 3
+
+  - Component
+    ![](./img/mvc1.png)
+
+  - MVC Architecture
+    ![](./img/mvc2.png)
+    ![](./img/mvc3.png)
+
+    - one of the big goals of MVC pattern is to actually separate business logic from application logic
+    - the model and view are in fact completely standalone and completely isolated. So again, they don't import each other, and they don't even import the controller. And in fact, they don't even know that the controller exists. All they do is to basically just sit there waiting to get some instructions from the controller.
+
+    ![](./img/mvc4.png)
+
+    - The model also contains a big state object that we export from the model. And this state will contain all sorts of data, like the current recipe, search results, bookmarks, etc.
+
+- Refactoring (Forkify Application) for MVC
+
+- Event Handlers in MVC: Publisher-Subscriber Pattern
+
+  - NOTE: Listening for an event should go into the view as this has more to do with DOM Manipulation as everything related to the DOM, so the view should be inside of a view --therefore we need a way of putting this logic here into a recipe view
+
+  - NOTE: event listeners should be attached to DOM elements in the view, but the events should then be handled by controller functions that live in the controller module.
+
+  - why not simply call the controlRecipes function righ in the view? Cant call because the view does not know anything about the controller (doesnt import the controller so we cant call any of the functions that are in the controller from the view --only works other way around). **Solution: Publisher-Subscriber Design Pattern**
+
+  - Publisher-Subscriber Pattern
+    ![](./img/pub-sub.png)
+    - Design Pattern --just a standard solutions to certain kinds of problems
+    - **Publisher** --code that knows when to react (e.g addHandlerRender function in view module --contain the addEventListener method)
+    - **Subscriber** --code that actually wants to react. Code that should actually be executed when the event happens (callback) (e.g controlRecipes function in controller module)
+    - NOTE: publisher does not know yet that the subscriber even exists as the subsciber in the controller the view cant access
+    - Solution: is that can now subscribe to the publisher by passing into subscriber function as an argument
+      - As we call addHandlerRender we pass in our controlRecipes as an argument. We subscribe controlRecipes to addHandlerRender and this two now finally connected
+      - Now addHandlerRender listens for events using addEventListener method as always and then as soon as the event actually happens, the controlRecipes function will be called as the callback function of event handlers
+    - SUMMARY: the handler subscribes to the publisher which is the listener in this case, and then as the publisher publishes an event, the subscriber is executed.
+
+- Implementing Error and Success Message
+
+  - Handling error will mean to display an error message in the view (DOM) rather than logging it in the console
+
+- Project Planning II
+  ![](./img/projPlanning2.png)
+
+- Project Planning III
+  ![](./img/projPlanning3.png)
+
+- Wrap Up: Final Consideration
+  - JSDocs Format
+    - standard way of writing documentation for JS functions
+    - advantage: if working with others can easily understand what exactly your function is doing
+
 ## Section 19: Setting Up Git and Deployment
+
+- Simple Deployment with Netlify
+  - Netlify --is a free service that let developers basically deploys static webpages or static web application --static means application only contains HTML, CSS and JS as well as some images but no database or no server side code at all --netlify only wors for front ene application
+  - Surge --like netlify
+  - Steps
+    - Need to final bundle ng Forkify App first
+      - in build command, we want our output to be in the dist folder --if in 2 ver of parcel only need to add --dist--dir at then specify the newfolder `parcel build index.html --dist-dir ./dist`
+      - in parcel ver 2 -- change main to default
+      - NOTE: if parcel in version 1 `parcel build index.html --out-dir ./dist`
+      - after all the changes, run build at terminal --output will be the final and compressed code ready for deployment
+- Setting up Git and Github
+
+  - install git on computer
+  - in terminal, run git init to initialized local repo of the parent folder of project (18-forkify\starter)
+  - Git repo --integration between git and VS code
+  - Github --store thr local repository in the cloud
+
+    - connect local git installation with Github account
+
+    - `git config --global user.name RacketShip01`
+    - `git config --global user.email racketship1155@gmail.com`
 
 # Note
 
 ## Differences Between Functional Programming vs OOP
 
-- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in functional programming is a declarative programming model, while object-oriented programming uses the imperative programming model. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key element
+- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in **functional programming is a declarative programming model**, while **object-oriented programming uses the imperative programming model**. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key element
