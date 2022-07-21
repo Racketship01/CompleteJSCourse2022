@@ -8140,183 +8140,6 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
 
   - Remember: page being displayed in the browser is the html from distribution folder not in the original src code folder --all the images and assets also coming from dist folder e.g icons. To still use the orginal src folder, solution? **Importing**.
 
-- **Forkify Application**
-
-  ```js
-  // import icons from '../img/icons.svg'; // Parcel 1
-  import icons from "url:../img/icons.svg"; // Parcel 2
-  // .. --means to the parent folder
-
-  import "core-js/stable"; // polyfilling to support old browser
-  import "regenerator-runtime/runtime"; // polyfilling async/await
-
-  const recipeContainer = document.querySelector(".recipe");
-
-  // https://forkify-api.herokuapp.com/v2
-
-  ///////////////////////////////////////
-
-  const renderSpinner = function (parentEl) {
-    const markUp = `
-    <div class="spinner">
-      <svg>
-        <use href="${icons}#icon-loader"></use>
-      </svg>
-    </div>
-    `;
-
-    parentEl.innerHTML = "";
-    parentEl.insertAdjacentHTML("afterbegin", markUp);
-  };
-
-  const showRecipe = async function () {
-    try {
-      // Hashchange and Load Event
-      const id = window.location.hash.slice(1); // window.location --basically means the entire URL
-      console.log(id);
-
-      if (!id) return;
-
-      // 1. Loading Recipe
-      renderSpinner(recipeContainer);
-      const response = await fetch(
-        //'https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bcc40'
-        "https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886"
-      );
-
-      const data = await response.json(); // this response object is the return response of the fetch function and then this json method which returns another promise
-
-      if (!response.ok) throw new Error(`${data.message} (${response.status})`);
-      // console.log(response, data);
-
-      let { recipe } = data.data;
-      recipe = {
-        id: recipe.id,
-        title: recipe.title,
-        publisher: recipe.publisher,
-        sourceUrl: recipe.source_url,
-        image: recipe.image_url,
-        servings: recipe.servings,
-        cookingTime: recipe.cooking_time,
-        ingredients: recipe.ingredients,
-      };
-      console.log(recipe);
-
-      // 2. Rendering Recipe
-      const markUp = `
-        <figure class="recipe__fig">
-          <img src="${recipe.image}" alt="${
-        recipe.title
-      }" class="recipe__img" />
-          <h1 class="recipe__title">
-            <span>${recipe.title}</span>
-          </h1>
-        </figure>
-  
-        <div class="recipe__details">
-          <div class="recipe__info">
-            <svg class="recipe__info-icon">
-              <use href="${icons}#icon-clock"></use>
-            </svg>
-            <span class="recipe__info-data recipe__info-data--minutes">${
-              recipe.cookingTime
-            }</span>
-            <span class="recipe__info-text">minutes</span>
-          </div>
-          <div class="recipe__info">
-            <svg class="recipe__info-icon">
-              <use href="${icons}#icon-users"></use>
-            </svg>
-            <span class="recipe__info-data recipe__info-data--people">${
-              recipe.servings
-            }</span>
-            <span class="recipe__info-text">servings</span>
-  
-            <div class="recipe__info-buttons">
-              <button class="btn--tiny btn--increase-servings">
-                <svg>
-                  <use href="${icons}#icon-minus-circle"></use>
-                </svg>
-              </button>
-              <button class="btn--tiny btn--increase-servings">
-                <svg>
-                  <use href="${icons}#icon-plus-circle"></use>
-                </svg>
-              </button>
-            </div>
-          </div>
-  
-          <div class="recipe__user-generated">
-            <svg>
-              <use href="${icons}#icon-user"></use>
-            </svg>
-          </div>
-          <button class="btn--round">
-            <svg class="">
-              <use href="${icons}#icon-bookmark-fill"></use>
-            </svg>
-          </button>
-        </div>
-  
-    <div class="recipe__ingredients">
-      <h2 class="heading--2">Recipe ingredients</h2>
-          <ul class="recipe__ingredient-list">
-            ${recipe.ingredients
-              .map((ing) => {
-                return `<li class="recipe__ingredient">
-    <svg class="recipe__icon">
-    <use href="${icons}#icon-check"></use>
-    </svg>
-    <div class="recipe__quantity">${ing.quantity}</div>
-    <div class="recipe__description">
-    <span class="recipe__unit">${ing.unit}</span>
-    ${ing.description}
-    </div>
-    </li>
-    `;
-              })
-              .join("")}
-          </ul>
-        </div>
-  
-        <div class="recipe__directions">
-          <h2 class="heading--2">How to cook it</h2>
-          <p class="recipe__directions-text">
-            This recipe was carefully designed and tested by
-            <span class="recipe__publisher">${
-              recipe.publisher
-            }</span>. Please check out
-            directions at their website.
-          </p>
-          <a
-            class="btn--small recipe__btn"
-            href="${recipe.sourceUrl}"
-            target="_blank"
-          >
-            <span>Directions</span>
-            <svg class="search__icon">
-              <use href="${icons}#icon-arrow-right"></use>
-            </svg>
-          </a>
-        </div>
-      `;
-      recipeContainer.innerHTML = " ";
-      recipeContainer.insertAdjacentHTML("afterbegin", markUp);
-    } catch (err) {
-      alert(err);
-    }
-  };
-  showRecipe();
-
-  // NOTE:  core-js (--special package use to polyfilling) & regenerator-runtime (intall multiple package) <npm i  core-js regenerator-runtime>
-
-  // Event Listener --Listening for Load and Hashchange Events
-  window.addEventListener("hashchange", showRecipe);
-
-  window.addEventListener("load", showRecipe); // this event fired off immediately after the page has a completed loading
-  // as we open the page, we also want to listen for the load event for the entire page loading
-  ```
-
 - The MVC Architecture
 
   - Why using Project/Software Architecture?
@@ -8400,8 +8223,24 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
     - `git config --global user.name RacketShip01`
     - `git config --global user.email racketship1155@gmail.com`
 
+- Git Fundamentals
+  - Modification in multiple files
+    - go back to on all of files to the previous commit use `git reset --hard HEAD`
+    - used to check commited log `git log` in this log commit id will be seen
+    - last commit to delete & go to initial commit `git reset --hard <--commit id-->`
+    - if lot of changes, reset is not recommended, instead used branch `git branch` --list of branches that have
+    - to create branch(a copy of the current master branch) `git branch <--name of branch-->`
+    - to switch to branch `git checkout <--name of branch-->`
+    - NOTE: switch back to master branch all added commited code to integrate (branch) with the main code(master). Branch and master are two different versions of the code
+    - to merge modified code from branch to master `git merge <--name of branch want to merge to current branch-->`
+    - NOTE: usually we never work in the master branch instead we simply add features in different new branch then once were done, merge branches to master. Using this technique we can always go back to what it was before
+    - Github cheat sheet : `[github git cheat sheet] - (https://education.github.com/git-cheat-sheet-education.pdf)`
+- Pushing to Github
+  - to connect remote repo(gitHub) to local repo(local file) `git remote add origin <--gitHub repo URL-->` origin --standard name(can be modified) of remote branch
+  - to push `git push origin master`
+
 # Note
 
 ## Differences Between Functional Programming vs OOP
 
-- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in **functional programming is a declarative programming model**, while **object-oriented programming uses the imperative programming model**. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key element
+- Functional programming is the programming technique that accentuates the functional factors required for creating and implementing the programs. OOP or the Object-Oriented Programs are the conceptual programming techniques that uses objects as the key. The programming model used in **functional programming is a declarative programming model**, while **object-oriented programming uses the imperative programming model**. In functional programs, variables and functions are the main elements of the code, while in object-oriented programs, objects and methods are the key element.
