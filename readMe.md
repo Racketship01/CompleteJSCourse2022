@@ -8207,6 +8207,7 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
   - Surge --like netlify
   - Steps
     - Need to final bundle ng Forkify App first
+      - first need to delete folder parcel-cache and dist folder in the initial bundler (start) before run build command as a final folder bundler
       - in build command, we want our output to be in the dist folder --if in 2 ver of parcel only need to add --dist--dir at then specify the newfolder `parcel build index.html --dist-dir ./dist`
       - in parcel ver 2 -- change main to default
       - NOTE: if parcel in version 1 `parcel build index.html --out-dir ./dist`
@@ -8225,19 +8226,34 @@ loadAll(["img/img-1.jpg", "img/img-2.jpg", "img/img-3.jpg"]);
 
 - Git Fundamentals
   - Modification in multiple files
-    - go back to on all of files to the previous commit use `git reset --hard HEAD`
+    - **go back** to on all of files to the previous commit use `git reset --hard HEAD`
     - used to check commited log `git log` in this log commit id will be seen
-    - last commit to delete & go to initial commit `git reset --hard <--commit id-->`
+    - last commit to **delete** & go to initial commit `git reset --hard <commit id>`
     - if lot of changes, reset is not recommended, instead used branch `git branch` --list of branches that have
-    - to create branch(a copy of the current master branch) `git branch <--name of branch-->`
-    - to switch to branch `git checkout <--name of branch-->`
+    - to **create branch**(a copy of the current master branch) `git branch <name of branch>`
+    - to **switch** to branch `git checkout <name of branch>`
     - NOTE: switch back to master branch all added commited code to integrate (branch) with the main code(master). Branch and master are two different versions of the code
-    - to merge modified code from branch to master `git merge <--name of branch want to merge to current branch-->`
+    - to **merge** modified code from branch to master `git merge <name of branch want to merge to current branch>`
     - NOTE: usually we never work in the master branch instead we simply add features in different new branch then once were done, merge branches to master. Using this technique we can always go back to what it was before
-    - Github cheat sheet : `[github git cheat sheet] - (https://education.github.com/git-cheat-sheet-education.pdf)`
+    - Github **cheat sheet** : `[github git cheat sheet] - (https://education.github.com/git-cheat-sheet-education.pdf)`
 - Pushing to Github
-  - to connect remote repo(gitHub) to local repo(local file) `git remote add origin <--gitHub repo URL-->` origin --standard name(can be modified) of remote branch
-  - to push `git push origin master`
+  - to **connect remote repo(gitHub)** to local repo(local file) `git remote add origin <gitHub repo URL>` origin --standard name(can be modified) of remote branch
+  - to **push** `git push origin master`
+  - to push **other branch** `git push origin <branch name>`
+  - to pull from remote to local
+    - copy repo URL and then do opposite of push which is pull
+      `git remote add <origin> <remote repo URL>` ---
+      `git pull <origin> master`
+    - create new repo at github then add a readme and .gitignore and then pull that repo onto our computer --it will automatically connect remote to local repo
+- Setting up continuous Integration with Netlify
+  - Connect a site to a git repository and whenever we change the code in our repo then that will automatically trigger a new deployment of our site
+  - In netlify
+    - Setting
+      - Build & deploy
+        - Choose continuous in Github
+          - Link repo (remote repo)
+          - Build command (parcel build index.html --dist-dir ./dist)
+          - Publish directory (dist) --compressed final folder for forkify app
 
 # Note
 
